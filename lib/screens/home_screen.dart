@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
     if (_locationLoaded) {
-      controller.animateCamera(CameraUpdate.newLatLngZoom(_center, 25));
+      controller.animateCamera(CameraUpdate.newLatLngZoom(_center, 25.0));
     }
   }
 
@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: GoogleMap(
         onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(target: _center, zoom: 12.0),
+        initialCameraPosition: CameraPosition(target: _center, zoom: 25.0),
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
       ),
