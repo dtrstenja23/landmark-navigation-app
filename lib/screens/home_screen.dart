@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:landmark_navigation_app/widgets/search_box.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,13 +11,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late GoogleMapController mapController;
+  GoogleMapController? mapController;
   bool _locationLoaded = false;
   LatLng _center = const LatLng(45.8150, 15.9819); // Zagreb
 
   @override
   void dispose() {
-    mapController.dispose();
+    mapController?.dispose();
     super.dispose();
   }
 
@@ -27,9 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+    setState(() {
+      mapController = controller;
+    });
     if (_locationLoaded) {
-      controller.animateCamera(CameraUpdate.newLatLngZoom(_center, 25.0));
+      controller.animateCamera(CameraUpdate.newLatLngZoom(_center, 20.0));
     }
   }
 
@@ -52,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Position position = await Geolocator.getCurrentPosition();
     final userLatLng = LatLng(position.latitude, position.longitude);
-    mapController.animateCamera(CameraUpdate.newLatLng(userLatLng));
+    mapController?.animateCamera(CameraUpdate.newLatLng(userLatLng));
     setState(() {
       _locationLoaded = true;
       _center = userLatLng;
@@ -66,11 +69,17 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Home'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
-      body: GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(target: _center, zoom: 25.0),
-        myLocationEnabled: true,
-        myLocationButtonEnabled: true,
+      body: Stack(
+        children: [
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(target: _center, zoom: 20.0),
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            mapType: MapType.satellite,
+          ),
+          if (mapController != null) SearchBox(mapController: mapController),
+        ],
       ),
     );
   }
