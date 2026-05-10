@@ -8,10 +8,12 @@ class SearchBox extends StatefulWidget {
     super.key,
     required this.mapController,
     required this.onDestinationSelected,
+    required this.controller,
   });
 
   final gmaps.GoogleMapController? mapController;
   final Function(gmaps.LatLng, String) onDestinationSelected;
+  final TextEditingController controller;
 
   @override
   State<SearchBox> createState() => _SearchBoxState();
@@ -21,7 +23,6 @@ class _SearchBoxState extends State<SearchBox> {
   late FlutterGooglePlacesSdk flutterGooglePlacesSdk;
   List<AutocompletePrediction> _predictions = [];
   gmaps.LatLng? _destination;
-  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -31,11 +32,6 @@ class _SearchBoxState extends State<SearchBox> {
     );
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   Future<void> _onSearchChanged(String query) async {
     if (query.isEmpty) {
@@ -66,7 +62,7 @@ class _SearchBoxState extends State<SearchBox> {
 
     if (lat != null && lng != null) {
       setState(() {
-        _searchController.text = placeDetails.place?.name ?? '';
+        widget.controller.text = placeDetails.place?.name ?? '';
         _predictions = [];
         _destination = gmaps.LatLng(lat, lng);
       });
@@ -97,7 +93,7 @@ class _SearchBoxState extends State<SearchBox> {
               suffixIcon: IconButton(
                 icon: const Icon(Icons.clear),
                 onPressed: () {
-                  _searchController.clear();
+                  widget.controller.clear();
                   setState(() => _predictions = []);
                 },
               ),
@@ -105,7 +101,7 @@ class _SearchBoxState extends State<SearchBox> {
               fillColor: Colors.white,
             ),
             onChanged: _onSearchChanged,
-            controller: _searchController,
+            controller: widget.controller,
           ),
         ),
         if (_predictions.isNotEmpty)

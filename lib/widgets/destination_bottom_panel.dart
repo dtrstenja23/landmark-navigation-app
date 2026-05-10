@@ -7,11 +7,13 @@ class DestinationBottomPanel extends StatelessWidget {
     required this.destination,
     required this.destinationName,
     required this.onDirectionsPressed,
+    required this.onClose,
   });
 
   final LatLng destination;
   final String destinationName;
   final VoidCallback onDirectionsPressed;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +22,7 @@ class DestinationBottomPanel extends StatelessWidget {
       right: 0,
       bottom: 0,
       child: Container(
+        height: 150,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -41,7 +44,7 @@ class DestinationBottomPanel extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
-                overflow: TextOverflow.ellipsis,
+                overflow: TextOverflow.clip,
               ),
             ),
             const SizedBox(width: 12),
@@ -49,6 +52,15 @@ class DestinationBottomPanel extends StatelessWidget {
               onPressed: onDirectionsPressed,
               icon: const Icon(Icons.directions),
               label: const Text('Upute'),
+            ),
+            const SizedBox(width: 12),
+            IconButton(
+              onPressed: onClose,
+              icon: const Icon(Icons.close),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[300],
+                foregroundColor: Colors.black,
+              ),
             ),
           ],
         ),

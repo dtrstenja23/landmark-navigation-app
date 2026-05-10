@@ -15,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _locationService = LocationService();
   final _directionsService = DirectionsService();
+  final _searchController = TextEditingController();
 
   GoogleMapController? mapController;
   LatLng _center = const LatLng(45.8150, 15.9819);
@@ -22,10 +23,12 @@ class _HomeScreenState extends State<HomeScreen> {
   LatLng? _selectedDestination;
   String? _selectedDestinationName;
   Set<Polyline> _polylines = {};
+  Set<Marker> _markers = {};
 
   @override
   void dispose() {
     mapController?.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -81,16 +84,25 @@ class _HomeScreenState extends State<HomeScreen> {
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
             polylines: _polylines,
+            markers: _markers,
           ),
           if (mapController != null)
             SearchBox(
               mapController: mapController,
+              controller: _searchController,
               onDestinationSelected: (latLng, name) {
                 setState(() {
                   _center = latLng;
                   _selectedDestination = latLng;
                   _selectedDestinationName = name;
                   _polylines = {};
+                  _markers = {
+                    Marker(
+                      markerId: const MarkerId('destination'),
+                      position: latLng,
+                      infoWindow: InfoWindow(title: name),
+                    ),
+                  };
                 });
               },
             ),
@@ -99,6 +111,15 @@ class _HomeScreenState extends State<HomeScreen> {
               destination: _selectedDestination!,
               destinationName: _selectedDestinationName!,
               onDirectionsPressed: _fetchRoute,
+              onClose: () {
+                _searchController.clear();
+                setState(() {
+                  _selectedDestination = null;
+                  _selectedDestinationName = null;
+                  _polylines = {};
+                  _markers = {};
+                });
+              },
             ),
         ],
       ),
