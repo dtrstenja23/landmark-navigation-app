@@ -14,6 +14,8 @@ class _HomeScreenState extends State<HomeScreen> {
   GoogleMapController? mapController;
   bool _locationLoaded = false;
   LatLng _center = const LatLng(45.8150, 15.9819); // Zagreb
+  LatLng? _selectedDestination;
+  String? _selectedDestinationName;
 
   @override
   void dispose() {
@@ -75,10 +77,19 @@ class _HomeScreenState extends State<HomeScreen> {
             onMapCreated: _onMapCreated,
             initialCameraPosition: CameraPosition(target: _center, zoom: 20.0),
             myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-            mapType: MapType.satellite,
+            myLocationButtonEnabled: false,
           ),
-          if (mapController != null) SearchBox(mapController: mapController),
+          if (mapController != null)
+            SearchBox(
+              mapController: mapController,
+              onDestinationSelected: (latLng, name) {
+                setState(() {
+                  _center = latLng;
+                  _selectedDestination = latLng;
+                  _selectedDestinationName = name;
+                });
+              },
+            ),
         ],
       ),
     );

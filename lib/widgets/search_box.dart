@@ -4,9 +4,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 
 class SearchBox extends StatefulWidget {
-  const SearchBox({super.key, required this.mapController});
+  const SearchBox({
+    super.key,
+    required this.mapController,
+    required this.onDestinationSelected,
+  });
 
   final gmaps.GoogleMapController? mapController;
+  final Function(gmaps.LatLng, String) onDestinationSelected;
 
   @override
   State<SearchBox> createState() => _SearchBoxState();
@@ -50,6 +55,7 @@ class _SearchBoxState extends State<SearchBox> {
   }
 
   Future<void> _onPredictionSelected(AutocompletePrediction prediction) async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final placeDetails = await flutterGooglePlacesSdk.fetchPlace(
       prediction.placeId,
       fields: [PlaceField.Location, PlaceField.Name],
@@ -66,8 +72,9 @@ class _SearchBoxState extends State<SearchBox> {
       });
 
       widget.mapController?.animateCamera(
-        gmaps.CameraUpdate.newLatLngZoom(_destination!, 18.0),
+        gmaps.CameraUpdate.newLatLngZoom(_destination!, 15.0),
       );
+      widget.onDestinationSelected(_destination!, placeDetails.place?.name ?? '');
     }
   }
 
@@ -76,12 +83,24 @@ class _SearchBoxState extends State<SearchBox> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
           child: TextField(
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Traži lokaciju...',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.search),
+              prefixIcon: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: _predictions.isNotEmpty
+                    ? () => _onPredictionSelected(_predictions.first)
+                    : null,
+              ),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  _searchController.clear();
+                  setState(() => _predictions = []);
+                },
+              ),
               filled: true,
               fillColor: Colors.white,
             ),
