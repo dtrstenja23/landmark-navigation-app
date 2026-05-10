@@ -6,10 +6,12 @@ class DestinationBottomPanel extends StatelessWidget {
     super.key,
     required this.destination,
     required this.destinationName,
+    required this.onDirectionsPressed,
   });
 
   final LatLng destination;
   final String destinationName;
+  final VoidCallback onDirectionsPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class DestinationBottomPanel extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: onDirectionsPressed,
               icon: const Icon(Icons.directions),
               label: const Text('Upute'),
             ),
