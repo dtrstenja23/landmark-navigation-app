@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:landmark_navigation_app/widgets/search_box.dart';
+import 'package:landmark_navigation_app/widgets/destination_bottom_panel.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -89,6 +90,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   _selectedDestinationName = name;
                 });
               },
+            ),
+          if (_selectedDestination != null)
+            DestinationBottomPanel(
+              destination: _selectedDestination!,
+              destinationName: _selectedDestinationName!,
             ),
         ],
       ),
