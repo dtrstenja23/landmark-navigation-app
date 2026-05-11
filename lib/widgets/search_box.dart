@@ -2,28 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:landmark_navigation_app/providers/navigation_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SearchBox extends StatefulWidget {
-  const SearchBox({
-    super.key,
-    required this.mapController,
-    required this.onDestinationSelected,
-    required this.controller,
-  });
+class SearchBox extends ConsumerStatefulWidget {
+  const SearchBox({super.key, required this.mapController});
 
   final gmaps.GoogleMapController? mapController;
-  final Function(gmaps.LatLng, String) onDestinationSelected;
-  final TextEditingController controller;
 
   @override
-  State<SearchBox> createState() => _SearchBoxState();
+  ConsumerState<SearchBox> createState() => _SearchBoxState();
 }
 
-class _SearchBoxState extends State<SearchBox> {
+class _SearchBoxState extends ConsumerState<SearchBox> {
   late FlutterGooglePlacesSdk flutterGooglePlacesSdk;
   final _focusNode = FocusNode();
+  final _controller = TextEditingController();
   List<AutocompletePrediction> _predictions = [];
-  gmaps.LatLng? _destination;
 
   @override
   void initState() {
@@ -37,6 +32,7 @@ class _SearchBoxState extends State<SearchBox> {
   @override
   void dispose() {
     _focusNode.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -68,24 +64,33 @@ class _SearchBoxState extends State<SearchBox> {
     final lng = placeDetails.place?.latLng?.lng;
 
     if (lat != null && lng != null) {
+      final destination = gmaps.LatLng(lat, lng);
+      final name = placeDetails.place?.name ?? '';
       setState(() {
-        widget.controller.text = placeDetails.place?.name ?? '';
         _predictions = [];
-        _destination = gmaps.LatLng(lat, lng);
       });
 
       widget.mapController?.animateCamera(
-        gmaps.CameraUpdate.newLatLngZoom(_destination!, 15.0),
+        gmaps.CameraUpdate.newLatLngZoom(destination, 15.0),
       );
-      widget.onDestinationSelected(
-        _destination!,
-        placeDetails.place?.name ?? '',
-      );
+      ref
+          .read(navigationProvider.notifier)
+          .selectDestination(destination, name);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(navigationProvider.select((s) => s.selectedDestination), (
+      prev,
+      next,
+    ) {
+      if (next == null) {
+        _controller.clear();
+        setState(() => _predictions = []);
+      }
+    });
+
     return Column(
       children: [
         Container(
@@ -103,11 +108,11 @@ class _SearchBoxState extends State<SearchBox> {
                         : null,
               ),
               suffixIcon:
-                  _focusNode.hasFocus && widget.controller.text.isNotEmpty
+                  _focusNode.hasFocus || _controller.text.isNotEmpty
                       ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
-                          widget.controller.clear();
+                          _controller.clear();
                           setState(() => _predictions = []);
                         },
                       )
@@ -116,7 +121,7 @@ class _SearchBoxState extends State<SearchBox> {
               fillColor: Colors.white,
             ),
             onChanged: _onSearchChanged,
-            controller: widget.controller,
+            controller: _controller,
           ),
         ),
         if (_predictions.isNotEmpty)

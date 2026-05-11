@@ -1,25 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:landmark_navigation_app/screens/navigation_screen.dart';
+import 'package:landmark_navigation_app/providers/navigation_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DestinationBottomPanel extends StatelessWidget {
-  const DestinationBottomPanel({
-    super.key,
-    required this.destination,
-    required this.destinationName,
-    required this.hasRoute,
-    required this.onDirectionsPressed,
-    required this.onClose,
-  });
-
-  final LatLng destination;
-  final String destinationName;
-  final bool hasRoute;
-  final VoidCallback onDirectionsPressed;
-  final VoidCallback onClose;
+class DestinationBottomPanel extends ConsumerWidget {
+  const DestinationBottomPanel({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final navigationState = ref.watch(navigationProvider);
+
     return Positioned(
       left: 0,
       right: 0,
@@ -45,7 +35,7 @@ class DestinationBottomPanel extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    destinationName,
+                    navigationState.destinationName ?? '',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -54,7 +44,11 @@ class DestinationBottomPanel extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: onClose,
+                  onPressed:
+                      () =>
+                          ref
+                              .read(navigationProvider.notifier)
+                              .clearDestination(),
                   icon: const Icon(Icons.close),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey[300],
@@ -64,21 +58,30 @@ class DestinationBottomPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            if (!hasRoute)
+            if (!navigationState.hasRoute)
               ElevatedButton.icon(
-                onPressed: onDirectionsPressed,
+                onPressed: () async {
+                  final success =
+                      await ref.read(navigationProvider.notifier).fetchRoute();
+                  if (!success && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Ruta nije pronađena.')),
+                    );
+                  }
+                },
                 icon: const Icon(Icons.directions),
                 label: const Text('Upute'),
               ),
-            if (hasRoute)
+            if (navigationState.hasRoute)
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder:
-                          (context) =>
-                              NavigationScreen(destination: destination),
+                          (context) => NavigationScreen(
+                            destination: navigationState.selectedDestination!,
+                          ),
                     ),
                   );
                 },
