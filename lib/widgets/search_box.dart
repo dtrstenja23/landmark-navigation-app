@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:landmark_navigation_app/providers/navigation_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'search_predictions_list.dart';
 
 class SearchBox extends ConsumerStatefulWidget {
   const SearchBox({super.key, required this.mapController});
@@ -53,32 +54,6 @@ class _SearchBoxState extends ConsumerState<SearchBox> {
     });
   }
 
-  Future<void> _onPredictionSelected(AutocompletePrediction prediction) async {
-    FocusManager.instance.primaryFocus?.unfocus();
-    final placeDetails = await flutterGooglePlacesSdk.fetchPlace(
-      prediction.placeId,
-      fields: [PlaceField.Location, PlaceField.Name],
-    );
-
-    final lat = placeDetails.place?.latLng?.lat;
-    final lng = placeDetails.place?.latLng?.lng;
-
-    if (lat != null && lng != null) {
-      final destination = gmaps.LatLng(lat, lng);
-      final name = placeDetails.place?.name ?? '';
-      setState(() {
-        _predictions = [];
-      });
-
-      widget.mapController?.animateCamera(
-        gmaps.CameraUpdate.newLatLngZoom(destination, 15.0),
-      );
-      ref
-          .read(navigationProvider.notifier)
-          .selectDestination(destination, name);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen(navigationProvider.select((s) => s.selectedDestination), (
@@ -88,64 +63,59 @@ class _SearchBoxState extends ConsumerState<SearchBox> {
       if (next == null) {
         _controller.clear();
         setState(() => _predictions = []);
+      } else {
+        final name = ref.read(navigationProvider).destinationName ?? '';
+        _controller.text = name;
+        FocusManager.instance.primaryFocus?.unfocus();
+        setState(() => _predictions = []);
+        widget.mapController?.animateCamera(
+          gmaps.CameraUpdate.newLatLngZoom(next, 15.0),
+        );
       }
     });
 
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+          margin: const EdgeInsets.fromLTRB(12.0, 16.0, 12.0, 8.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 8,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
           child: TextField(
             focusNode: _focusNode,
+            controller: _controller,
             decoration: InputDecoration(
-              labelText: 'Traži lokaciju...',
-              border: OutlineInputBorder(),
-              prefixIcon: IconButton(
-                icon: const Icon(Icons.search),
-                onPressed:
-                    _predictions.isNotEmpty
-                        ? () => _onPredictionSelected(_predictions.first)
-                        : null,
-              ),
+              hintText: 'Traži lokaciju...',
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 14),
+              prefixIcon: const Icon(Icons.search, color: Colors.grey),
               suffixIcon:
                   _focusNode.hasFocus || _controller.text.isNotEmpty
                       ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear, color: Colors.grey),
                         onPressed: () {
                           _controller.clear();
                           setState(() => _predictions = []);
+                          ref
+                              .read(navigationProvider.notifier)
+                              .clearDestination();
                         },
                       )
                       : null,
-              filled: true,
-              fillColor: Colors.white,
             ),
             onChanged: _onSearchChanged,
-            controller: _controller,
           ),
         ),
         if (_predictions.isNotEmpty)
-          Container(
-            constraints: const BoxConstraints(maxHeight: 300),
-            margin: const EdgeInsets.symmetric(horizontal: 8.0),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8.0),
-              color: Colors.white,
-            ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _predictions.length,
-              itemBuilder: (context, index) {
-                final prediction = _predictions[index];
-                return ListTile(
-                  title: Text(prediction.primaryText),
-                  subtitle: Text(prediction.secondaryText),
-                  onTap: () => _onPredictionSelected(prediction),
-                );
-              },
-            ),
-          ),
+          SearchPredictionsList(predictions: _predictions),
       ],
     );
   }
