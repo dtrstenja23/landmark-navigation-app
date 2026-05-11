@@ -21,6 +21,7 @@ class SearchBox extends StatefulWidget {
 
 class _SearchBoxState extends State<SearchBox> {
   late FlutterGooglePlacesSdk flutterGooglePlacesSdk;
+  final _focusNode = FocusNode();
   List<AutocompletePrediction> _predictions = [];
   gmaps.LatLng? _destination;
 
@@ -30,8 +31,14 @@ class _SearchBoxState extends State<SearchBox> {
     flutterGooglePlacesSdk = FlutterGooglePlacesSdk(
       dotenv.env['GOOGLE_MAPS_API_KEY']!,
     );
+    _focusNode.addListener(() => setState(() {}));
   }
 
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   Future<void> _onSearchChanged(String query) async {
     if (query.isEmpty) {
@@ -70,7 +77,10 @@ class _SearchBoxState extends State<SearchBox> {
       widget.mapController?.animateCamera(
         gmaps.CameraUpdate.newLatLngZoom(_destination!, 15.0),
       );
-      widget.onDestinationSelected(_destination!, placeDetails.place?.name ?? '');
+      widget.onDestinationSelected(
+        _destination!,
+        placeDetails.place?.name ?? '',
+      );
     }
   }
 
@@ -81,22 +91,27 @@ class _SearchBoxState extends State<SearchBox> {
         Container(
           padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
           child: TextField(
+            focusNode: _focusNode,
             decoration: InputDecoration(
               labelText: 'Traži lokaciju...',
               border: OutlineInputBorder(),
               prefixIcon: IconButton(
                 icon: const Icon(Icons.search),
-                onPressed: _predictions.isNotEmpty
-                    ? () => _onPredictionSelected(_predictions.first)
-                    : null,
+                onPressed:
+                    _predictions.isNotEmpty
+                        ? () => _onPredictionSelected(_predictions.first)
+                        : null,
               ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  widget.controller.clear();
-                  setState(() => _predictions = []);
-                },
-              ),
+              suffixIcon:
+                  _focusNode.hasFocus && widget.controller.text.isNotEmpty
+                      ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          widget.controller.clear();
+                          setState(() => _predictions = []);
+                        },
+                      )
+                      : null,
               filled: true,
               fillColor: Colors.white,
             ),

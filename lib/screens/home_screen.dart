@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _selectedDestinationName;
   Set<Polyline> _polylines = {};
   Set<Marker> _markers = {};
+  bool _hasRoute = false;
 
   @override
   void dispose() {
@@ -55,8 +56,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchRoute() async {
     if (_selectedDestination == null) return;
     final result = await _directionsService.fetchRoute(_userLocation, _selectedDestination!);
-    if (result == null || !mounted) return;
+    if (!mounted) return;
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ruta nije pronađena.')),
+      );
+      return;
+    }
     setState(() {
+      _hasRoute = true;
       _polylines = {
         Polyline(
           polylineId: const PolylineId('route'),
@@ -95,6 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _center = latLng;
                   _selectedDestination = latLng;
                   _selectedDestinationName = name;
+                  _hasRoute = false;
                   _polylines = {};
                   _markers = {
                     Marker(
@@ -110,12 +119,14 @@ class _HomeScreenState extends State<HomeScreen> {
             DestinationBottomPanel(
               destination: _selectedDestination!,
               destinationName: _selectedDestinationName!,
+              hasRoute: _hasRoute,
               onDirectionsPressed: _fetchRoute,
               onClose: () {
                 _searchController.clear();
                 setState(() {
                   _selectedDestination = null;
                   _selectedDestinationName = null;
+                  _hasRoute = false;
                   _polylines = {};
                   _markers = {};
                 });

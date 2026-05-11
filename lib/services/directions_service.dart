@@ -44,8 +44,8 @@ class DirectionsService {
     if (response.statusCode != 200) return null;
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
-    final routes = data['routes'] as List<dynamic>;
-    if (routes.isEmpty) return null;
+    final routes = data['routes'] as List<dynamic>?;
+    if (routes == null || routes.isEmpty) return null;
 
     final route = routes[0] as Map<String, dynamic>;
     final points = PolylineUtils.decode(

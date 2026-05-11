@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:landmark_navigation_app/screens/navigation_screen.dart';
 
 class DestinationBottomPanel extends StatelessWidget {
   const DestinationBottomPanel({
     super.key,
     required this.destination,
     required this.destinationName,
+    required this.hasRoute,
     required this.onDirectionsPressed,
     required this.onClose,
   });
 
   final LatLng destination;
   final String destinationName;
+  final bool hasRoute;
   final VoidCallback onDirectionsPressed;
   final VoidCallback onClose;
 
@@ -35,33 +38,53 @@ class DestinationBottomPanel extends StatelessWidget {
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Text(
-                destinationName,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    destinationName,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                overflow: TextOverflow.clip,
+                IconButton(
+                  onPressed: onClose,
+                  icon: const Icon(Icons.close),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[300],
+                    foregroundColor: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (!hasRoute)
+              ElevatedButton.icon(
+                onPressed: onDirectionsPressed,
+                icon: const Icon(Icons.directions),
+                label: const Text('Upute'),
               ),
-            ),
-            const SizedBox(width: 12),
-            ElevatedButton.icon(
-              onPressed: onDirectionsPressed,
-              icon: const Icon(Icons.directions),
-              label: const Text('Upute'),
-            ),
-            const SizedBox(width: 12),
-            IconButton(
-              onPressed: onClose,
-              icon: const Icon(Icons.close),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[300],
-                foregroundColor: Colors.black,
+            if (hasRoute)
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) =>
+                              NavigationScreen(destination: destination),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.navigation),
+                label: const Text('Početak'),
               ),
-            ),
           ],
         ),
       ),
