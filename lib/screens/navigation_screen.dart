@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:landmark_navigation_app/providers/navigation_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NavigationScreen extends StatefulWidget {
-  const NavigationScreen({super.key, required this.destination});
-
-  final gmaps.LatLng destination;
+class NavigationScreen extends ConsumerStatefulWidget {
+  const NavigationScreen({super.key});
 
   @override
-  State<NavigationScreen> createState() => _NavigationScreenState();
+  ConsumerState<NavigationScreen> createState() => _NavigationScreenState();
 }
 
-class _NavigationScreenState extends State<NavigationScreen> {
+class _NavigationScreenState extends ConsumerState<NavigationScreen> {
   @override
   void initState() {
     super.initState();
@@ -21,11 +20,16 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final navigationState = ref.watch(navigationProvider);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Navigacija')),
+      appBar: AppBar(
+        title: const Text('Navigacija'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
       body: Center(
         child: Text(
-          'Prikaz rute do odredišta:\nLat: ${widget.destination.latitude}, Lng: ${widget.destination.longitude}',
+          'Prikaz rute do odredišta:\nLat: ${navigationState.selectedDestination?.latitude}, Lng: ${navigationState.selectedDestination?.longitude}',
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 18),
         ),
