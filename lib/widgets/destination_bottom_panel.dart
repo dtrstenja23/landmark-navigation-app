@@ -58,36 +58,54 @@ class DestinationBottomPanel extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            if (!navigationState.hasRoute)
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final success =
-                      await ref.read(navigationProvider.notifier).fetchRoute();
-                  if (!success && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Ruta nije pronađena.')),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.directions),
-                label: const Text('Upute'),
-              ),
-            if (navigationState.hasRoute)
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => NavigationScreen(
-                            destination: navigationState.selectedDestination!,
+            Row(
+              children: [
+                if (!navigationState.hasRoute)
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      final success =
+                          await ref
+                              .read(navigationProvider.notifier)
+                              .fetchRoute();
+                      if (!success && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Row(
+                              children: [
+                                Icon(Icons.error_outline, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text('Ruta nije pronađena.'),
+                              ],
+                            ),
+                            backgroundColor: Colors.red[700],
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            margin: const EdgeInsets.all(12),
                           ),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.navigation),
-                label: const Text('Početak'),
-              ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.directions),
+                    label: const Text('Upute'),
+                  ),
+                const SizedBox(width: 8),
+                if (navigationState.hasRoute)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NavigationScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.navigation),
+                    label: const Text('Početak'),
+                  ),
+              ],
+            ),
           ],
         ),
       ),

@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
       title: 'Landmark-Based Navigation App',
       theme: ThemeData().copyWith(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        appBarTheme: const AppBarTheme(foregroundColor: Colors.white),
       ),
       home: const HomeScreen(),
     );
