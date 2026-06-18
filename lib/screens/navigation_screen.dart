@@ -10,13 +10,15 @@ class NavigationScreen extends ConsumerStatefulWidget {
 }
 
 class _NavigationScreenState extends ConsumerState<NavigationScreen> {
+  Future<void> _fetchRoute() async {
+    await ref.read(navigationProvider.notifier).fetchRoute();
+  }
+
   @override
   void initState() {
     super.initState();
     _fetchRoute();
   }
-
-  Future<void> _fetchRoute() async {}
 
   @override
   Widget build(BuildContext context) {
