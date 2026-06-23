@@ -1,6 +1,8 @@
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 import { env } from './config/env.ts';
 import { prisma } from './config/db.ts';
+import { swaggerSpec } from './config/swagger.ts';
 import { errorHandler } from './middleware/errorHandler.ts';
 import { notFound } from './middleware/notFound.ts';
 import routes from './routes/index.ts';
@@ -8,6 +10,8 @@ import routes from './routes/index.ts';
 const app = express();
 
 app.use(express.json());
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api', routes);
 
