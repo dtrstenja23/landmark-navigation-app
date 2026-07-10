@@ -13,6 +13,17 @@ const FIELD_MASK = [
 
 type LatLng = {lat:number; lng:number;};
 
+export type GoogleRoutesRequest = {
+    origin: { location: { latLng: { latitude: number; longitude: number } } };
+    destination: { location: { latLng: { latitude: number; longitude: number } } };
+    travelMode: 'WALK' | 'DRIVE';
+    languageCode: string;
+    units: string;
+    computeAlternativeRoutes:boolean;
+    routingPreference?: string;
+    routeModifiers?: { avoidTolls: boolean, avoidHighways: boolean; avoidFerries: boolean}
+};
+
 export type GoogleRoutesResponse = {
     routes: {
         distanceMeters: number;
@@ -33,7 +44,7 @@ export async function generateRoutes(params:{
     destination: LatLng;
     travel_mode: 'WALK' | 'DRIVE';
 }){
-    const body: Record<string, unknown>={
+    const body: GoogleRoutesRequest={
         origin: {location:{latLng:{latitude:params.origin.lat, longitude:params.origin.lng}}},
         destination: {location:{latLng:{latitude:params.destination.lat, longitude:params.destination.lng}}},
         travelMode: params.travel_mode,
