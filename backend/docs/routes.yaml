@@ -36,6 +36,49 @@ paths:
           description: Route created
         400:
           description: Validation failed
+  /api/routes/generate:
+    post:
+      summary: Generate a route via Google Routes API and save it with its steps
+      tags: [Routes]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_id, origin, destination, travel_mode, mode]
+              properties:
+                device_id:
+                  type: string
+                origin:
+                  type: object
+                  required: [lat, lng]
+                  properties:
+                    lat:
+                      type: number
+                    lng:
+                      type: number
+                destination:
+                  type: object
+                  required: [lat, lng]
+                  properties:
+                    lat:
+                      type: number
+                    lng:
+                      type: number
+                travel_mode:
+                  type: string
+                  enum: [WALK, DRIVE]
+                mode:
+                  type: string
+                  enum: [hybrid, landmark, classic]
+      responses:
+        201:
+          description: Route generated and saved
+        400:
+          description: Validation failed
+        422:
+          description: No route found for the given origin/destination
   /api/routes/{id}:
     get:
       summary: Get a route by id

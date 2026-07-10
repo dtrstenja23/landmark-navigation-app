@@ -24,6 +24,20 @@ export const updateRouteSchema = z
     message: 'At least one field must be provided',
   });
 
+export const generateRouteSchema = z.object({
+  device_id: z.string().min(1),
+  origin: z.object({
+    lat: z.number(),
+    lng: z.number()
+  }),
+  destination: z.object({
+    lat: z.number(),
+    lng: z.number()
+  }),
+  travel_mode: z.enum(['WALK', 'DRIVE']),
+  mode: z.enum(['hybrid', 'landmark', 'classic'])
+});
+
 export const idParamSchema = z.object({
   id: z.coerce.number().int().positive(),
 });

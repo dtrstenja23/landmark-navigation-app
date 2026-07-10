@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
 import { routesService } from '../services/routes.service.ts';
 import { AppError } from '../utils/AppError.ts';
-import { createRouteSchema, idParamSchema, updateRouteSchema } from '../validators/routes.validator.ts';
-
+import { createRouteSchema, generateRouteSchema, idParamSchema, updateRouteSchema } from '../validators/routes.validator.ts';
+import { routeGenerationService } from '../services/route-generation.service.ts';
 export async function getRoutes(_req: Request, res: Response) {
   const routes = await routesService.getAll();
   res.json({ data: routes });
@@ -15,6 +15,12 @@ export async function getRoute(req: Request, res: Response) {
     throw new AppError('Route not found', 404);
   }
   res.json({ data: route });
+}
+
+export async function generateRoute(req: Request, res: Response){
+  const data = generateRouteSchema.parse(req.body);
+  const result = await routeGenerationService.generate(data);
+  res.status(201).json({ data: result });
 }
 
 export async function createRoute(req: Request, res: Response) {
@@ -35,3 +41,4 @@ export async function deleteRoute(req: Request, res: Response) {
   await routesService.remove(id);
   res.status(204).send();
 }
+
