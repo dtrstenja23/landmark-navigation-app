@@ -1,39 +1,30 @@
+import 'package:landmark_navigation_app/models/navigation_step.dart';
+
 class RouteModel {
   const RouteModel({
     required this.id,
-    this.userId,
-    required this.originLat,
-    required this.originLng,
-    required this.destLat,
-    required this.destLng,
-    this.polyline,
-    this.totalDistanceM,
-    this.createdAt,
+    required this.polyline,
+    required this.totalDistanceM,
+    required this.userId,
+    required this.steps,
   });
 
   factory RouteModel.fromJson(Map<String, dynamic> json) {
     return RouteModel(
-      id: json['id'] as int,
-      userId: json['user_id'] as int?,
-      originLat: (json['origin_lat'] as num).toDouble(),
-      originLng: (json['origin_lng'] as num).toDouble(),
-      destLat: (json['dest_lat'] as num).toDouble(),
-      destLng: (json['dest_lng'] as num).toDouble(),
-      polyline: json['polyline'] as String?,
-      totalDistanceM: json['total_distance_m'] as int?,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
+      id: json['route']['id'] as int,
+      polyline: json['route']['polyline'] as String,
+      totalDistanceM: json['route']['total_distance_m'] as int,
+      userId: json['user_id'] as int,
+      steps:
+          (json['steps'] as List<dynamic>)
+              .map((e) => NavigationStep.fromJson(e as Map<String, dynamic>))
+              .toList(),
     );
   }
 
   final int id;
-  final int? userId;
-  final double originLat;
-  final double originLng;
-  final double destLat;
-  final double destLng;
-  final String? polyline;
-  final int? totalDistanceM;
-  final DateTime? createdAt;
+  final String polyline;
+  final int totalDistanceM;
+  final int userId;
+  final List<NavigationStep> steps;
 }

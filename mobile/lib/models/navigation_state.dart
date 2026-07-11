@@ -1,4 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:landmark_navigation_app/models/navigation_step.dart';
 
 class NavigationState {
   const NavigationState({
@@ -9,6 +10,8 @@ class NavigationState {
     this.polylines = const {},
     this.markers = const {},
     this.routeBounds,
+    this.travelMode,
+    this.steps,
   });
 
   final LatLng userLocation;
@@ -18,4 +21,30 @@ class NavigationState {
   final Set<Polyline> polylines;
   final Set<Marker> markers;
   final LatLngBounds? routeBounds;
+  final String? travelMode;
+  final List<NavigationStep>? steps;
+
+  NavigationState copyWith({
+    LatLng? userLocation,
+    LatLng? selectedDestination,
+    String? destinationName,
+    bool? hasRoute,
+    Set<Polyline>? polylines,
+    Set<Marker>? markers,
+    LatLngBounds? routeBounds,
+    String? travelMode,
+    List<NavigationStep>? steps,
+  }) {
+    return NavigationState(
+      userLocation: userLocation ?? this.userLocation,
+      selectedDestination: selectedDestination ?? this.selectedDestination,
+      destinationName: destinationName ?? this.destinationName,
+      hasRoute: hasRoute ?? this.hasRoute,
+      polylines: polylines ?? this.polylines,
+      markers: markers ?? this.markers,
+      routeBounds: routeBounds ?? this.routeBounds,
+      travelMode: travelMode ?? this.travelMode,
+      steps: steps ?? this.steps,
+    );
+  }
 }
