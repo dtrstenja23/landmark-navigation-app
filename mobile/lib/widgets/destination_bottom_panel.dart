@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:landmark_navigation_app/screens/navigation_screen.dart';
 import 'package:landmark_navigation_app/providers/navigation_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:landmark_navigation_app/widgets/travel_mode_selector.dart';
 
 class DestinationBottomPanel extends ConsumerWidget {
   const DestinationBottomPanel({super.key});
@@ -15,7 +16,6 @@ class DestinationBottomPanel extends ConsumerWidget {
       right: 0,
       bottom: 0,
       child: Container(
-        height: 150,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -29,6 +29,7 @@ class DestinationBottomPanel extends ConsumerWidget {
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -43,6 +44,7 @@ class DestinationBottomPanel extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
                 IconButton(
                   onPressed:
                       () =>
@@ -57,7 +59,9 @@ class DestinationBottomPanel extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            const TravelModeSelector(),
+            const SizedBox(height: 12),
             Row(
               children: [
                 if (!navigationState.hasRoute)
