@@ -63,6 +63,7 @@ class NavigationNotifier extends Notifier<NavigationState> {
   Future<bool> fetchRoute() async {
     if (state.selectedDestination == null) return false;
 
+    state = state.copyWith(isFetchingRoute: true);
     try {
       final deviceId = await _deviceIdentityService.getDeviceId();
       final route = await _routeGenerationService.generateRoute(
@@ -91,6 +92,8 @@ class NavigationNotifier extends Notifier<NavigationState> {
       return true;
     } catch (_) {
       return false;
+    } finally {
+      state = state.copyWith(isFetchingRoute: false);
     }
   }
 }

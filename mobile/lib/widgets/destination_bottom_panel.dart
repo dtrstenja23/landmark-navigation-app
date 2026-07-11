@@ -66,32 +66,48 @@ class DestinationBottomPanel extends ConsumerWidget {
               children: [
                 if (!navigationState.hasRoute)
                   ElevatedButton.icon(
-                    onPressed: () async {
-                      final success =
-                          await ref
-                              .read(navigationProvider.notifier)
-                              .fetchRoute();
-                      if (!success && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Row(
-                              children: [
-                                Icon(Icons.error_outline, color: Colors.white),
-                                SizedBox(width: 8),
-                                Text('Ruta nije pronađena.'),
-                              ],
-                            ),
-                            backgroundColor: Colors.red[700],
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            margin: const EdgeInsets.all(12),
-                          ),
-                        );
-                      }
-                    },
-                    icon: const Icon(Icons.directions),
+                    onPressed:
+                        navigationState.isFetchingRoute
+                            ? null
+                            : () async {
+                              final success =
+                                  await ref
+                                      .read(navigationProvider.notifier)
+                                      .fetchRoute();
+                              if (!success && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Row(
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline,
+                                          color: Colors.white,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text('Ruta nije pronađena.'),
+                                      ],
+                                    ),
+                                    backgroundColor: Colors.red[700],
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    margin: const EdgeInsets.all(12),
+                                  ),
+                                );
+                              }
+                            },
+                    icon:
+                        navigationState.isFetchingRoute
+                            ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : const Icon(Icons.directions),
                     label: const Text('Upute'),
                   ),
                 const SizedBox(width: 8),
