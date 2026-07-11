@@ -41,8 +41,9 @@ export const routeGenerationService = {
         }
 
         const navigationSteps: NavigationStepInput[] = route.legs[0].steps.map((step:any,index:number)=>{
+            const maneuver = step.navigationInstruction?.maneuver ?? 'MANEUVER_UNSPECIFIED';
             const instruction = generateInstruction({
-                maneuver: step.navigationInstruction!.maneuver,
+                maneuver,
                 distanceMeters: step.distanceMeters,
                 landmark: null,
                 mode: params.mode
@@ -52,7 +53,7 @@ export const routeGenerationService = {
                 step_index: index,
                 instruction_text: instruction.text,
                 distance_m: step.distanceMeters,
-                maneuver: step.navigationInstruction!.maneuver,
+                maneuver,
                 start_lat: step.startLocation.latLng.latitude,
                 start_lng: step.startLocation.latLng.longitude,
                 end_lat: step.endLocation.latLng.latitude,
