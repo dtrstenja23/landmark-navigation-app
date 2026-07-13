@@ -32,8 +32,14 @@ export function generateInstruction(params:{
     distanceMeters: number;
     landmark: {name: string} | null;
     mode: 'hybrid' | 'landmark' | 'classic';
+    isArrival?: boolean;
 }):Instruction{
-    const { maneuver, distanceMeters, landmark, mode } = params;
+    const { maneuver, distanceMeters, landmark, mode, isArrival } = params;
+
+    if(isArrival){
+        return { text: 'Stigli ste na odredište', isLandmarkBased: false };
+    }
+
     const base = MANEUVER[maneuver] ?? MANEUVER.MANEUVER_UNSPECIFIED;
     let instruction : Instruction;
     if(mode === 'classic' || landmark === null){
