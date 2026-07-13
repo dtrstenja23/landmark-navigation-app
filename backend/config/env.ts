@@ -5,6 +5,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   PORT: z.coerce.number().int().positive().default(3000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  GOOGLE_MAPS_API_KEY: z.string().min(1)
 });
 
 const parsed = envSchema.safeParse(process.env);

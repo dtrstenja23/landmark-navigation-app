@@ -20,6 +20,8 @@ dependencies:
   http: ^1.2.0
   google_polyline_algorithm: ^3.1.0
   flutter_riverpod: ^2.5.0
+  shared_preferences: ^2.3.0
+  uuid: ^4.5.0
 
 dev_dependencies:
   flutter_test:

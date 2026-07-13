@@ -48,6 +48,11 @@ model navigation_steps {
   distance_m        Int?
   landmark_id       Int?
   is_landmark_based Boolean?   @default(false)
+  maneuver          String?    @db.VarChar(50)
+  start_lat         Float?
+  start_lng         Float?
+  end_lat           Float?
+  end_lng           Float?
   events            events[]
   landmarks         landmarks? @relation(fields: [landmark_id], references: [id], onUpdate: NoAction)
   routes            routes?    @relation(fields: [route_id], references: [id], onDelete: Cascade, onUpdate: NoAction)

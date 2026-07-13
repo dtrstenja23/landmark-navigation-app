@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart' hide LatLng;
+import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart'
+    hide LatLng, LatLngBounds;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:landmark_navigation_app/services/directions_service.dart';
 import 'package:landmark_navigation_app/models/navigation_state.dart';
+import 'package:landmark_navigation_app/services/device_identity_service.dart';
+import 'package:landmark_navigation_app/services/route_generation_service.dart';
+import 'package:landmark_navigation_app/utils/polyline_utils.dart';
 
 class NavigationNotifier extends Notifier<NavigationState> {
-  final _directionsService = DirectionsService();
+  final _routeGenerationService = RouteGenerationService();
+  final _deviceIdentityService = DeviceIdentityService();
   late final FlutterGooglePlacesSdk _placesClient;
 
   @override
@@ -29,20 +33,15 @@ class NavigationNotifier extends Notifier<NavigationState> {
   }
 
   void setUserLocation(LatLng location) {
-    state = NavigationState(
-      userLocation: location,
-      selectedDestination: state.selectedDestination,
-      destinationName: state.destinationName,
-      hasRoute: state.hasRoute,
-      polylines: state.polylines,
-      markers: state.markers,
-      routeBounds: state.routeBounds,
-    );
+    state = state.copyWith(userLocation: location);
+  }
+
+  void setTravelMode(String travelMode) {
+    state = state.copyWith(travelMode: travelMode);
   }
 
   void selectDestination(LatLng latLng, String name) {
-    state = NavigationState(
-      userLocation: state.userLocation,
+    state = state.copyWith(
       selectedDestination: latLng,
       destinationName: name,
       hasRoute: false,
@@ -63,29 +62,59 @@ class NavigationNotifier extends Notifier<NavigationState> {
 
   Future<bool> fetchRoute() async {
     if (state.selectedDestination == null) return false;
-    final result = await _directionsService.fetchRoute(
-      state.userLocation,
-      state.selectedDestination!,
-    );
-    if (result == null) return false;
-    state = NavigationState(
-      userLocation: state.userLocation,
-      selectedDestination: state.selectedDestination,
-      destinationName: state.destinationName,
-      hasRoute: true,
-      polylines: {
-        Polyline(
-          polylineId: const PolylineId('route'),
-          points: result.points,
-          color: Colors.blue,
-          width: 5,
-        ),
-      },
-      markers: state.markers,
-      routeBounds: result.bounds,
-    );
-    return true;
+
+    state = state.copyWith(isFetchingRoute: true);
+    try {
+      final deviceId = await _deviceIdentityService.getDeviceId();
+      final route = await _routeGenerationService.generateRoute(
+        deviceId: deviceId,
+        origin: state.userLocation,
+        destination: state.selectedDestination!,
+        travelMode: state.travelMode ?? 'WALK',
+        mode: 'hybrid',
+      );
+
+      final points = PolylineUtils.decode(route.polyline);
+
+      state = state.copyWith(
+        hasRoute: true,
+        polylines: {
+          Polyline(
+            polylineId: const PolylineId('route'),
+            points: points,
+            color: Colors.blue,
+            width: 5,
+          ),
+        },
+        routeBounds: _boundsFromPoints(points),
+        steps: route.steps,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    } finally {
+      state = state.copyWith(isFetchingRoute: false);
+    }
   }
+}
+
+LatLngBounds _boundsFromPoints(List<LatLng> points) {
+  var minLat = points.first.latitude;
+  var maxLat = points.first.latitude;
+  var minLng = points.first.longitude;
+  var maxLng = points.first.longitude;
+
+  for (final point in points) {
+    if (point.latitude < minLat) minLat = point.latitude;
+    if (point.latitude > maxLat) maxLat = point.latitude;
+    if (point.longitude < minLng) minLng = point.longitude;
+    if (point.longitude > maxLng) maxLng = point.longitude;
+  }
+
+  return LatLngBounds(
+    southwest: LatLng(minLat, minLng),
+    northeast: LatLng(maxLat, maxLng),
+  );
 }
 
 final navigationProvider =
