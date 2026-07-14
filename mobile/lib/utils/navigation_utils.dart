@@ -14,7 +14,7 @@ class NavigationUtils {
   static double distanceToPolyline(LatLng position, List<LatLng> polyline) {
     if (polyline.isEmpty) return double.infinity;
     if (polyline.length == 1) {
-      return _distanceToSegment(position, polyline.first, polyline.first);
+      return _distanceToPoint(position, polyline.first);
     }
 
     var minDistance = double.infinity;
@@ -55,9 +55,19 @@ class NavigationUtils {
     return _metersPerDegLat * math.cos(latDeg * math.pi / 180);
   }
 
+  static double _distanceToPoint(LatLng point, LatLng target) =>
+      _distanceToSegment(point, target, target);
+
+  static double _threshold(
+    String travelMode, {
+    required double walk,
+    required double drive,
+  }) {
+    return travelMode == 'DRIVE' ? drive : walk;
+  }
+
   static double distanceToNextManeuver(LatLng position, NavigationStep step) {
-    final maneuverPoint = LatLng(step.startLat, step.startLng);
-    return _distanceToSegment(position, maneuverPoint, maneuverPoint);
+    return _distanceToPoint(position, LatLng(step.startLat, step.startLng));
   }
 
   static bool shouldAdvanceStep(
@@ -65,10 +75,11 @@ class NavigationUtils {
     NavigationStep step,
     String travelMode,
   ) {
-    final threshold =
-        travelMode == 'DRIVE'
-            ? _advanceThresholdDriveM
-            : _advanceThresholdWalkM;
+    final threshold = _threshold(
+      travelMode,
+      walk: _advanceThresholdWalkM,
+      drive: _advanceThresholdDriveM,
+    );
     return distanceToNextManeuver(position, step) <= threshold;
   }
 
@@ -77,10 +88,11 @@ class NavigationUtils {
     List<LatLng> polyline,
     String travelMode,
   ) {
-    final threshold =
-        travelMode == 'DRIVE'
-            ? _offRouteThresholdDriveM
-            : _offRouteThresholdWalkM;
+    final threshold = _threshold(
+      travelMode,
+      walk: _offRouteThresholdWalkM,
+      drive: _offRouteThresholdDriveM,
+    );
     return distanceToPolyline(position, polyline) > threshold;
   }
 }
