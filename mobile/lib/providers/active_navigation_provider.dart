@@ -64,6 +64,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     }
 
     state = state.copyWith(
+      currentPosition: position,
       currentStepIndex: stepIndex,
       distanceToManeuver: NavigationUtils.distanceToNextManeuver(
         position,

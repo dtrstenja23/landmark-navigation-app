@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:landmark_navigation_app/providers/active_navigation_provider.dart';
 import 'package:landmark_navigation_app/providers/navigation_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,31 +12,52 @@ class NavigationScreen extends ConsumerStatefulWidget {
 }
 
 class _NavigationScreenState extends ConsumerState<NavigationScreen> {
-  Future<void> _fetchRoute() async {
-    await ref.read(navigationProvider.notifier).fetchRoute();
+  GoogleMapController? mapController;
+
+  void _onMapCreated(GoogleMapController controller) {
+    setState(() => mapController = controller);
   }
 
   @override
   void initState() {
     super.initState();
-    _fetchRoute();
+    ref.read(activeNavigationProvider.notifier).start();
+  }
+
+  @override
+  void dispose() {
+    ref.read(activeNavigationProvider.notifier).stop();
+    mapController?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final navigationState = ref.watch(navigationProvider);
 
+    ref.listen(activeNavigationProvider, (previous, next) {
+      if (next.currentPosition != null) {
+        mapController?.animateCamera(
+          CameraUpdate.newLatLng(next.currentPosition!),
+        );
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Navigacija'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
-      body: Center(
-        child: Text(
-          'Prikaz rute do odredišta:\nLat: ${navigationState.selectedDestination?.latitude}, Lng: ${navigationState.selectedDestination?.longitude}',
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 18),
+      body: GoogleMap(
+        onMapCreated: _onMapCreated,
+        initialCameraPosition: CameraPosition(
+          target: navigationState.userLocation,
+          zoom: 20.0,
         ),
+        myLocationEnabled: true,
+        myLocationButtonEnabled: false,
+        polylines: navigationState.polylines,
+        markers: navigationState.markers,
       ),
     );
   }
