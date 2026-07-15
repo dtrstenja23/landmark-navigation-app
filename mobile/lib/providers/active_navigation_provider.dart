@@ -20,6 +20,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
   void start() {
     _positionSubscription = _locationService.positionStream().listen(
       _onPosition,
+      onError: (_) => stop(),
     );
   }
 
@@ -66,7 +67,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       currentStepIndex: stepIndex,
       distanceToManeuver: NavigationUtils.distanceToNextManeuver(
         position,
-        currentStep,
+        steps[stepIndex],
       ),
       offRoute: _offRouteStreak >= 3,
       arrived: isLastStep && reachedStep,
