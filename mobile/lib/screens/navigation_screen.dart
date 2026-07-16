@@ -4,6 +4,7 @@ import 'package:landmark_navigation_app/providers/active_navigation_provider.dar
 import 'package:landmark_navigation_app/providers/navigation_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:landmark_navigation_app/widgets/instruction_banner.dart';
+import 'package:landmark_navigation_app/widgets/next_step.dart';
 
 class NavigationScreen extends ConsumerStatefulWidget {
   const NavigationScreen({super.key});
@@ -63,6 +64,7 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
             markers: navigationState.markers,
           ),
           InstructionBanner(),
+          NextStep(),
         ],
       ),
     );
