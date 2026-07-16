@@ -17,26 +17,31 @@ class InstructionBanner extends ConsumerWidget {
 
     final currentStep = steps[activeState.currentStepIndex];
 
-    var maneuverPhrase = currentStep.instructionText;
-    final prefixEnd = maneuverPhrase.indexOf(' m ');
-    if (maneuverPhrase.startsWith('Za ') && prefixEnd != -1) {
-      maneuverPhrase = maneuverPhrase.substring(prefixEnd + 3);
-    }
-    final landmarkStart = maneuverPhrase.indexOf(' kod "');
-    if (landmarkStart != -1) {
-      maneuverPhrase = maneuverPhrase.substring(0, landmarkStart);
-    }
-    if (maneuverPhrase.isNotEmpty) {
-      maneuverPhrase =
-          maneuverPhrase[0].toLowerCase() + maneuverPhrase.substring(1);
-    }
+    String displayText;
+    if (activeState.arrived) {
+      displayText = currentStep.instructionText;
+    } else {
+      var maneuverPhrase = currentStep.instructionText;
+      final prefixEnd = maneuverPhrase.indexOf(' m ');
+      if (maneuverPhrase.startsWith('Za ') && prefixEnd != -1) {
+        maneuverPhrase = maneuverPhrase.substring(prefixEnd + 3);
+      }
+      final landmarkStart = maneuverPhrase.indexOf(' kod "');
+      if (landmarkStart != -1) {
+        maneuverPhrase = maneuverPhrase.substring(0, landmarkStart);
+      }
+      if (maneuverPhrase.isNotEmpty) {
+        maneuverPhrase =
+            maneuverPhrase[0].toLowerCase() + maneuverPhrase.substring(1);
+      }
 
-    final landmarkText =
-        currentStep.landmarkName != null
-            ? 'kod "${currentStep.landmarkName}" '
-            : '';
-    final displayText =
-        'Za ${activeState.distanceToManeuver.round()} m $landmarkText$maneuverPhrase';
+      final landmarkText =
+          currentStep.landmarkName != null
+              ? 'kod "${currentStep.landmarkName}" '
+              : '';
+      displayText =
+          'Za ${activeState.distanceToManeuver.round()} m $landmarkText$maneuverPhrase';
+    }
 
     return Align(
       alignment: Alignment.topCenter,
@@ -72,7 +77,10 @@ class InstructionBanner extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    ref.read(activeNavigationProvider.notifier).stop();
+                    Navigator.pop(context);
+                  },
                   icon: const Icon(Icons.cancel, color: Colors.white),
                 ),
               ],
