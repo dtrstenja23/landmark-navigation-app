@@ -45,6 +45,15 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
       }
     });
 
+    ref.listen(activeNavigationProvider, (previous, next) {
+      if (next.arrived && previous?.arrived != true) {
+        ref.read(activeNavigationProvider.notifier).stop();
+        Future.delayed(const Duration(seconds: 2), () {
+          if (context.mounted) Navigator.pop(context);
+        });
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Navigacija'),
