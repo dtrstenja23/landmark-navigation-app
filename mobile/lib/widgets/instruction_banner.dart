@@ -10,15 +10,19 @@ class InstructionBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final screenSize = MediaQuery.of(context).size;
 
-    final steps = ref.watch(navigationProvider).steps;
+    final navState = ref.watch(navigationProvider);
+    final steps = navState.steps;
     final activeState = ref.watch(activeNavigationProvider);
 
     if (steps == null || steps.isEmpty) return const SizedBox.shrink();
 
     final currentStep = steps[activeState.currentStepIndex];
+    final isRerouting = navState.isFetchingRoute;
 
     String displayText;
-    if (activeState.arrived) {
+    if (isRerouting) {
+      displayText = 'Preusmjeravam...';
+    } else if (activeState.arrived) {
       displayText = currentStep.instructionText;
     } else {
       var maneuverPhrase = currentStep.instructionText;
@@ -58,11 +62,20 @@ class InstructionBanner extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                const Icon(
-                  Icons.arrow_right_alt,
-                  color: Colors.white,
-                  size: 36,
-                ),
+                isRerouting
+                    ? const SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 3,
+                      ),
+                    )
+                    : const Icon(
+                      Icons.arrow_right_alt,
+                      color: Colors.white,
+                      size: 36,
+                    ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(

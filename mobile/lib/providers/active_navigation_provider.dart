@@ -48,6 +48,12 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     );
     _offRouteStreak = isOffRoute ? _offRouteStreak + 1 : 0;
 
+    if (_offRouteStreak >= 3 && !navState.isFetchingRoute) {
+      state = state.copyWith(offRoute: true);
+      _reroute(position);
+      return;
+    }
+
     var stepIndex = state.currentStepIndex;
     var shownAt = state.stepShownAt;
     final wasLastStep = stepIndex == steps.length - 1;
@@ -64,9 +70,13 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     }
 
     final isLastStep = stepIndex == steps.length - 1;
-    final distanceToManeuver = isLastStep
-        ? NavigationUtils.distanceToDestination(position, steps[stepIndex])
-        : NavigationUtils.distanceToNextManeuver(position, steps[stepIndex]);
+    final distanceToManeuver =
+        isLastStep
+            ? NavigationUtils.distanceToDestination(position, steps[stepIndex])
+            : NavigationUtils.distanceToNextManeuver(
+              position,
+              steps[stepIndex],
+            );
     final arrived =
         isLastStep &&
         NavigationUtils.hasArrived(position, steps[stepIndex], travelMode);
@@ -79,6 +89,21 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       arrived: arrived,
       stepShownAt: shownAt,
     );
+  }
+
+  Future<void> _reroute(LatLng position) async {
+    final notifier = ref.read(navigationProvider.notifier);
+    notifier.setUserLocation(position);
+    final success = await notifier.fetchRoute();
+
+    if (success) {
+      _offRouteStreak = 0;
+      state = state.copyWith(
+        currentStepIndex: 0,
+        stepShownAt: {},
+        offRoute: false,
+      );
+    }
   }
 }
 
