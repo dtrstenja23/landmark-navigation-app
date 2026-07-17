@@ -50,28 +50,33 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
 
     var stepIndex = state.currentStepIndex;
     var shownAt = state.stepShownAt;
-    final isLastStep = stepIndex == steps.length - 1;
+    final wasLastStep = stepIndex == steps.length - 1;
     final reachedStep = NavigationUtils.shouldAdvanceStep(
       position,
       currentStep,
       travelMode,
     );
-    if (reachedStep && !isLastStep) {
+    if (reachedStep && !wasLastStep) {
       stepIndex++;
       final newShownAt = Map<int, DateTime>.from(shownAt);
       newShownAt[stepIndex] = DateTime.now();
       shownAt = newShownAt;
     }
 
+    final isLastStep = stepIndex == steps.length - 1;
+    final distanceToManeuver = isLastStep
+        ? NavigationUtils.distanceToDestination(position, steps[stepIndex])
+        : NavigationUtils.distanceToNextManeuver(position, steps[stepIndex]);
+    final arrived =
+        isLastStep &&
+        NavigationUtils.hasArrived(position, steps[stepIndex], travelMode);
+
     state = state.copyWith(
       currentPosition: position,
       currentStepIndex: stepIndex,
-      distanceToManeuver: NavigationUtils.distanceToNextManeuver(
-        position,
-        steps[stepIndex],
-      ),
+      distanceToManeuver: distanceToManeuver,
       offRoute: _offRouteStreak >= 3,
-      arrived: isLastStep && reachedStep,
+      arrived: arrived,
       stepShownAt: shownAt,
     );
   }

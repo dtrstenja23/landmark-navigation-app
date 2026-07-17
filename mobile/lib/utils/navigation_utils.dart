@@ -83,6 +83,23 @@ class NavigationUtils {
     return distanceToNextManeuver(position, step) <= threshold;
   }
 
+  static double distanceToDestination(LatLng position, NavigationStep lastStep) {
+    return _distanceToPoint(position, LatLng(lastStep.endLat, lastStep.endLng));
+  }
+
+  static bool hasArrived(
+    LatLng position,
+    NavigationStep lastStep,
+    String travelMode,
+  ) {
+    final threshold = _threshold(
+      travelMode,
+      walk: _advanceThresholdWalkM,
+      drive: _advanceThresholdDriveM,
+    );
+    return distanceToDestination(position, lastStep) <= threshold;
+  }
+
   static bool isOffRoute(
     LatLng position,
     List<LatLng> polyline,
