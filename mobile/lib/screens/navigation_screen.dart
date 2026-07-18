@@ -15,6 +15,7 @@ class NavigationScreen extends ConsumerStatefulWidget {
 
 class _NavigationScreenState extends ConsumerState<NavigationScreen> {
   GoogleMapController? mapController;
+  late final ActiveNavigationNotifier _activeNavigationNotifier;
 
   void _onMapCreated(GoogleMapController controller) {
     setState(() => mapController = controller);
@@ -23,12 +24,13 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(activeNavigationProvider.notifier).start();
+    _activeNavigationNotifier = ref.read(activeNavigationProvider.notifier);
+    _activeNavigationNotifier.start();
   }
 
   @override
   void dispose() {
-    ref.read(activeNavigationProvider.notifier).stop();
+    _activeNavigationNotifier.stop();
     mapController?.dispose();
     super.dispose();
   }
@@ -47,7 +49,7 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
 
     ref.listen(activeNavigationProvider, (previous, next) {
       if (next.arrived && previous?.arrived != true) {
-        ref.read(activeNavigationProvider.notifier).stop();
+        _activeNavigationNotifier.stop();
         Future.delayed(const Duration(seconds: 2), () {
           if (context.mounted) Navigator.pop(context);
         });
