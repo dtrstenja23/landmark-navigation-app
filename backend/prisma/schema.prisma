@@ -69,6 +69,7 @@ model routes {
   dest_lng         Float
   polyline         String?
   total_distance_m Int?
+  total_duration_s Int?
   created_at       DateTime?          @default(now()) @db.Timestamp(6)
   navigation_steps navigation_steps[]
   users            users?             @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
