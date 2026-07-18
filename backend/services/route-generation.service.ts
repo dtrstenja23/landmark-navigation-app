@@ -74,6 +74,8 @@ export const routeGenerationService = {
             throw new AppError("Ruta nije pronađena", 422);
         }
 
+        const totalDurationS = parseInt(route.duration, 10) || null;
+
         const landmarksByStepIndex = new Map<number, landmarks>();
 
         const steps = route.legs[0].steps;
@@ -100,7 +102,12 @@ export const routeGenerationService = {
                     distanceMeters: step.distanceMeters,
                     landmark,
                     mode: params.mode,
-                    isArrival
+                    isArrival,
+                    start: point,
+                    end: {
+                        lat: step.endLocation.latLng.latitude,
+                        lng: step.endLocation.latLng.longitude
+                    }
                 });
 
                 const navigationStep: NavigationStepInput = {
@@ -130,6 +137,7 @@ export const routeGenerationService = {
                     dest_lng: params.destination.lng,
                     polyline: route.polyline.encodedPolyline,
                     total_distance_m: route.distanceMeters,
+                    total_duration_s: totalDurationS,
                 },
             });
 
@@ -148,6 +156,7 @@ export const routeGenerationService = {
                 id: createdRoute.id,
                 polyline: createdRoute.polyline,
                 total_distance_m: createdRoute.total_distance_m,
+                total_duration_s: createdRoute.total_duration_s,
             },
             user_id: user.id,
             steps: createdSteps.map((step) => {

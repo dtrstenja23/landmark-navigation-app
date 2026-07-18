@@ -27,6 +27,7 @@ export type GoogleRoutesRequest = {
 export type GoogleRoutesResponse = {
     routes: {
         distanceMeters: number;
+        duration: string;
         polyline: { encodedPolyline: string };
         legs: {
             steps: {

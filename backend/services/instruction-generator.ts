@@ -1,3 +1,24 @@
+const COMPASS = [
+    'sjever', 'sjeveroistok', 'istok', 'jugoistok',
+    'jug', 'jugozapad', 'zapad', 'sjeverozapad'
+];
+
+function calculateBearing(start: {lat: number; lng: number}, end: {lat: number; lng: number}): number {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const deltaLng = toRad(end.lng - start.lng);
+    const lat1 = toRad(start.lat);
+    const lat2 = toRad(end.lat);
+
+    const y = Math.sin(deltaLng) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLng);
+
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+function bearingToCompass(bearingDeg: number): string {
+    return COMPASS[Math.round(bearingDeg / 45) % 8];
+}
+
 const MANEUVER: Record<string,string> = {
     MANEUVER_UNSPECIFIED: 'nastavi ravno',
     TURN_SLIGHT_LEFT: 'skreni blago lijevo',
@@ -18,7 +39,6 @@ const MANEUVER: Record<string,string> = {
     FERRY_TRAIN: 'ukrcaj se na vlak-trajekt',
     ROUNDABOUT_LEFT: 'na kružnom toku izađi lijevo',
     ROUNDABOUT_RIGHT: 'na kružnom toku izađi desno',
-    DEPART: 'kreni',
     NAME_CHANGE: 'nastavi ravno'
 };
 
@@ -33,11 +53,21 @@ export function generateInstruction(params:{
     landmark: {name: string} | null;
     mode: 'hybrid' | 'landmark' | 'classic';
     isArrival?: boolean;
+    start?: { lat: number; lng: number };
+    end?: { lat: number; lng: number };
 }):Instruction{
-    const { maneuver, distanceMeters, landmark, mode, isArrival } = params;
+    const { maneuver, distanceMeters, landmark, mode, isArrival, start, end } = params;
 
     if(isArrival){
         return { text: 'Stigli ste na odredište', isLandmarkBased: false };
+    }
+
+    if(maneuver === 'DEPART'){
+        const direction = start && end ? bearingToCompass(calculateBearing(start, end)) : null;
+        return {
+            text: direction ? `Kreni na ${direction}` : 'Kreni',
+            isLandmarkBased: false
+        };
     }
 
     const base = MANEUVER[maneuver] ?? MANEUVER.MANEUVER_UNSPECIFIED;

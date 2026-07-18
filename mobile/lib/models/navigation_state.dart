@@ -13,6 +13,8 @@ class NavigationState {
     this.travelMode,
     this.steps,
     this.isFetchingRoute = false,
+    this.totalDistanceM,
+    this.totalDurationS,
   });
 
   final LatLng userLocation;
@@ -25,6 +27,8 @@ class NavigationState {
   final String? travelMode;
   final List<NavigationStep>? steps;
   final bool isFetchingRoute;
+  final int? totalDistanceM;
+  final int? totalDurationS;
 
   NavigationState copyWith({
     LatLng? userLocation,
@@ -37,6 +41,8 @@ class NavigationState {
     String? travelMode,
     List<NavigationStep>? steps,
     bool? isFetchingRoute,
+    int? totalDistanceM,
+    int? totalDurationS,
   }) {
     return NavigationState(
       userLocation: userLocation ?? this.userLocation,
@@ -49,6 +55,8 @@ class NavigationState {
       travelMode: travelMode ?? this.travelMode,
       steps: steps ?? this.steps,
       isFetchingRoute: isFetchingRoute ?? this.isFetchingRoute,
+      totalDistanceM: totalDistanceM ?? this.totalDistanceM,
+      totalDurationS: totalDurationS ?? this.totalDurationS,
     );
   }
 }

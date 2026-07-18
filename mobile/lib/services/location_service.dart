@@ -16,4 +16,13 @@ class LocationService {
     final position = await Geolocator.getCurrentPosition();
     return LatLng(position.latitude, position.longitude);
   }
+
+  Stream<LatLng> positionStream() {
+    return Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 5,
+      ),
+    ).map((position) => LatLng(position.latitude, position.longitude));
+  }
 }
