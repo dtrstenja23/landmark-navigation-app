@@ -10,6 +10,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
   final _locationService = LocationService();
   StreamSubscription<LatLng>? _positionSubscription;
   int _offRouteStreak = 0;
+  bool _stopped = false;
 
   @override
   ActiveNavigationState build() {
@@ -18,6 +19,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
   }
 
   void start() {
+    _stopped = false;
     _positionSubscription = _locationService.positionStream().listen(
       _onPosition,
       onError: (_) => stop(),
@@ -25,6 +27,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
   }
 
   void stop() {
+    _stopped = true;
     _positionSubscription?.cancel();
     _positionSubscription = null;
   }
@@ -57,11 +60,11 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     var stepIndex = state.currentStepIndex;
     var shownAt = state.stepShownAt;
     final wasLastStep = stepIndex == steps.length - 1;
-    final reachedStep = NavigationUtils.shouldAdvanceStep(
-      position,
-      currentStep,
-      travelMode,
-    );
+    final currentTargetsEnd = wasLastStep || currentStep.maneuver == 'DEPART';
+    final reachedStep =
+        currentTargetsEnd
+            ? NavigationUtils.hasReachedStepEnd(position, currentStep, travelMode)
+            : NavigationUtils.shouldAdvanceStep(position, currentStep, travelMode);
     if (reachedStep && !wasLastStep) {
       stepIndex++;
       final newShownAt = Map<int, DateTime>.from(shownAt);
@@ -70,16 +73,15 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     }
 
     final isLastStep = stepIndex == steps.length - 1;
+    final newCurrentStep = steps[stepIndex];
+    final newTargetsEnd = isLastStep || newCurrentStep.maneuver == 'DEPART';
     final distanceToManeuver =
-        isLastStep
-            ? NavigationUtils.distanceToDestination(position, steps[stepIndex])
-            : NavigationUtils.distanceToNextManeuver(
-              position,
-              steps[stepIndex],
-            );
+        newTargetsEnd
+            ? NavigationUtils.distanceToStepEnd(position, newCurrentStep)
+            : NavigationUtils.distanceToNextManeuver(position, newCurrentStep);
     final arrived =
         isLastStep &&
-        NavigationUtils.hasArrived(position, steps[stepIndex], travelMode);
+        NavigationUtils.hasReachedStepEnd(position, newCurrentStep, travelMode);
 
     state = state.copyWith(
       currentPosition: position,
@@ -96,7 +98,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     notifier.setUserLocation(position);
     final success = await notifier.fetchRoute();
 
-    if (success) {
+    if (success && !_stopped) {
       _offRouteStreak = 0;
       state = state.copyWith(
         currentStepIndex: 0,

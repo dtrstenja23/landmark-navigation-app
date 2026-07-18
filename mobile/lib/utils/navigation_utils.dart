@@ -83,13 +83,13 @@ class NavigationUtils {
     return distanceToNextManeuver(position, step) <= threshold;
   }
 
-  static double distanceToDestination(LatLng position, NavigationStep lastStep) {
-    return _distanceToPoint(position, LatLng(lastStep.endLat, lastStep.endLng));
+  static double distanceToStepEnd(LatLng position, NavigationStep step) {
+    return _distanceToPoint(position, LatLng(step.endLat, step.endLng));
   }
 
-  static bool hasArrived(
+  static bool hasReachedStepEnd(
     LatLng position,
-    NavigationStep lastStep,
+    NavigationStep step,
     String travelMode,
   ) {
     final threshold = _threshold(
@@ -97,7 +97,7 @@ class NavigationUtils {
       walk: _advanceThresholdWalkM,
       drive: _advanceThresholdDriveM,
     );
-    return distanceToDestination(position, lastStep) <= threshold;
+    return distanceToStepEnd(position, step) <= threshold;
   }
 
   static bool isOffRoute(
