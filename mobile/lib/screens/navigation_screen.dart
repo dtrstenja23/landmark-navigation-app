@@ -22,6 +22,13 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
     setState(() => mapController = controller);
   }
 
+  void _recenter() {
+    final position = ref.read(activeNavigationProvider).currentPosition;
+    if (position != null) {
+      mapController?.animateCamera(CameraUpdate.newLatLng(position));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -72,12 +79,23 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
             ),
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
             polylines: navigationState.polylines,
             markers: navigationState.markers,
           ),
           InstructionBanner(),
           NextStep(),
           InfoBottomPanel(),
+          Positioned(
+            right: 16,
+            bottom: 100,
+            child: FloatingActionButton(
+              heroTag: 'recenter',
+              onPressed: _recenter,
+              backgroundColor: Colors.white,
+              child: const Icon(Icons.my_location, color: Colors.black87),
+            ),
+          ),
         ],
       ),
     );
