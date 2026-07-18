@@ -5,6 +5,7 @@ class RouteModel {
     required this.id,
     required this.polyline,
     required this.totalDistanceM,
+    required this.totalDurationS,
     required this.userId,
     required this.steps,
   });
@@ -14,6 +15,7 @@ class RouteModel {
       id: json['route']['id'] as int,
       polyline: json['route']['polyline'] as String,
       totalDistanceM: json['route']['total_distance_m'] as int,
+      totalDurationS: json['route']['total_duration_s'] as int?,
       userId: json['user_id'] as int,
       steps:
           (json['steps'] as List<dynamic>)
@@ -25,6 +27,7 @@ class RouteModel {
   final int id;
   final String polyline;
   final int totalDistanceM;
+  final int? totalDurationS;
   final int userId;
   final List<NavigationStep> steps;
 }

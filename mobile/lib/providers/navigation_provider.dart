@@ -88,6 +88,8 @@ class NavigationNotifier extends Notifier<NavigationState> {
         },
         routeBounds: _boundsFromPoints(points),
         steps: route.steps,
+        totalDistanceM: route.totalDistanceM,
+        totalDurationS: route.totalDurationS,
       );
       return true;
     } catch (_) {

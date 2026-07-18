@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:landmark_navigation_app/providers/active_navigation_provider.dart';
 import 'package:landmark_navigation_app/providers/navigation_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:landmark_navigation_app/widgets/info_bottom_panel.dart';
 import 'package:landmark_navigation_app/widgets/instruction_banner.dart';
 import 'package:landmark_navigation_app/widgets/next_step.dart';
 
@@ -76,6 +77,7 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
           ),
           InstructionBanner(),
           NextStep(),
+          InfoBottomPanel(),
         ],
       ),
     );
