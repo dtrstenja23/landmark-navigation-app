@@ -21,7 +21,7 @@ class NextStep extends ConsumerWidget {
     final nextStep = steps[nextIndex];
 
     return Positioned(
-      top: screenSize.height * 0.1 + 8,
+      top: screenSize.height * 0.1 + 16,
       left: 0,
       right: 0,
       child: Align(
