@@ -100,7 +100,12 @@ export const routeGenerationService = {
                     distanceMeters: step.distanceMeters,
                     landmark,
                     mode: params.mode,
-                    isArrival
+                    isArrival,
+                    start: point,
+                    end: {
+                        lat: step.endLocation.latLng.latitude,
+                        lng: step.endLocation.latLng.longitude
+                    }
                 });
 
                 const navigationStep: NavigationStepInput = {

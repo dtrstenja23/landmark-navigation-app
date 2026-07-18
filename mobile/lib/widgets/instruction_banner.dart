@@ -22,7 +22,7 @@ class InstructionBanner extends ConsumerWidget {
     String displayText;
     if (isRerouting) {
       displayText = 'Preusmjeravam...';
-    } else if (activeState.arrived) {
+    } else if (activeState.arrived || currentStep.maneuver == 'DEPART') {
       displayText = currentStep.instructionText;
     } else {
       var maneuverPhrase = currentStep.instructionText;
