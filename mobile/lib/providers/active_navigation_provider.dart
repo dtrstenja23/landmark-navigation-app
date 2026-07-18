@@ -7,6 +7,8 @@ import 'package:landmark_navigation_app/services/location_service.dart';
 import 'package:landmark_navigation_app/utils/navigation_utils.dart';
 
 class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
+  static const _stepLookahead = 3;
+
   final _locationService = LocationService();
   StreamSubscription<LatLng>? _positionSubscription;
   int _offRouteStreak = 0;
@@ -38,7 +40,6 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     if (steps == null || steps.isEmpty) return;
 
     final travelMode = navState.travelMode ?? 'WALK';
-    final currentStep = steps[state.currentStepIndex];
     final polylinePoints =
         navState.polylines.isEmpty
             ? <LatLng>[]
@@ -59,14 +60,20 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
 
     var stepIndex = state.currentStepIndex;
     var shownAt = state.stepShownAt;
-    final wasLastStep = stepIndex == steps.length - 1;
-    final currentTargetsEnd = wasLastStep || currentStep.maneuver == 'DEPART';
-    final reachedStep =
-        currentTargetsEnd
-            ? NavigationUtils.hasReachedStepEnd(position, currentStep, travelMode)
-            : NavigationUtils.shouldAdvanceStep(position, currentStep, travelMode);
-    if (reachedStep && !wasLastStep) {
-      stepIndex++;
+
+    final lookaheadEnd =
+        stepIndex + _stepLookahead < steps.length - 1
+            ? stepIndex + _stepLookahead
+            : steps.length - 1;
+    for (var i = stepIndex; i < lookaheadEnd; i++) {
+      final step = steps[i];
+      final reached =
+          step.maneuver == 'DEPART'
+              ? NavigationUtils.hasReachedStepEnd(position, step, travelMode)
+              : NavigationUtils.shouldAdvanceStep(position, step, travelMode);
+      if (reached) stepIndex = i + 1;
+    }
+    if (stepIndex != state.currentStepIndex) {
       final newShownAt = Map<int, DateTime>.from(shownAt);
       newShownAt[stepIndex] = DateTime.now();
       shownAt = newShownAt;
@@ -99,9 +106,12 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     final success = await notifier.fetchRoute();
 
     if (success && !_stopped) {
+      final steps = ref.read(navigationProvider).steps ?? [];
+      final startIndex =
+          steps.length > 1 && steps.first.maneuver == 'DEPART' ? 1 : 0;
       _offRouteStreak = 0;
       state = state.copyWith(
-        currentStepIndex: 0,
+        currentStepIndex: startIndex,
         stepShownAt: {},
         offRoute: false,
       );
