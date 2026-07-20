@@ -8,6 +8,7 @@ class ActiveNavigationState {
     this.offRoute = false,
     this.arrived = false,
     this.stepShownAt = const {},
+    this.sessionId,
   });
   final LatLng? currentPosition;
   final int currentStepIndex;
@@ -15,6 +16,7 @@ class ActiveNavigationState {
   final bool offRoute;
   final bool arrived;
   final Map<int, DateTime> stepShownAt;
+  final int? sessionId;
 
   ActiveNavigationState copyWith({
     LatLng? currentPosition,
@@ -23,6 +25,7 @@ class ActiveNavigationState {
     bool? offRoute,
     bool? arrived,
     Map<int, DateTime>? stepShownAt,
+    int? sessionId,
   }) {
     return ActiveNavigationState(
       currentPosition: currentPosition ?? this.currentPosition,
@@ -31,6 +34,7 @@ class ActiveNavigationState {
       offRoute: offRoute ?? this.offRoute,
       arrived: arrived ?? this.arrived,
       stepShownAt: stepShownAt ?? this.stepShownAt,
+      sessionId: sessionId ?? this.sessionId,
     );
   }
 }

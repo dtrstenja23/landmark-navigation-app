@@ -91,6 +91,8 @@ class NavigationNotifier extends Notifier<NavigationState> {
         steps: route.steps,
         totalDistanceM: route.totalDistanceM,
         totalDurationS: route.totalDurationS,
+        routeId: route.id,
+        userId: route.userId,
       );
       return true;
     } catch (_) {
