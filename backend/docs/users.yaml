@@ -31,6 +31,25 @@ paths:
           description: Validation failed
         409:
           description: device_id already exists
+  /api/users/upsert:
+    post:
+      summary: Get or create a user by device_id
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_id]
+              properties:
+                device_id:
+                  type: string
+      responses:
+        200:
+          description: Existing or newly created user
+        400:
+          description: Validation failed
   /api/users/{id}:
     get:
       summary: Get a user by id
