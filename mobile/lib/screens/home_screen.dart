@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:landmark_navigation_app/providers/settings_provider.dart';
+import 'package:landmark_navigation_app/screens/settings_screen.dart';
 import 'package:landmark_navigation_app/services/location_service.dart';
 import 'package:landmark_navigation_app/widgets/destination_bottom_panel.dart';
 import 'package:landmark_navigation_app/widgets/search_box.dart';
@@ -56,6 +57,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: const Text('Home'),
         backgroundColor: Theme.of(context).colorScheme.primary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SettingsScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: [

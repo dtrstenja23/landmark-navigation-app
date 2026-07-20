@@ -18,7 +18,6 @@ class SettingsNotifier extends Notifier<SettingsState> {
     state = state.copyWith(
       userId: user.id,
       mode: user.preferredMode,
-      consentResearch: user.consentResearch,
       isLoading: false,
     );
   }
@@ -29,15 +28,6 @@ class SettingsNotifier extends Notifier<SettingsState> {
     try {
       await _userService.updateUser(userId, preferredMode: mode);
       state = state.copyWith(mode: mode);
-    } catch (_) {}
-  }
-
-  Future<void> setConsent(bool consent) async {
-    final userId = state.userId;
-    if (userId == null) return;
-    try {
-      await _userService.updateUser(userId, consentResearch: consent);
-      state = state.copyWith(consentResearch: consent);
     } catch (_) {}
   }
 }

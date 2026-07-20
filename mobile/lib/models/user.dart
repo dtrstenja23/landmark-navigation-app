@@ -3,7 +3,6 @@ class User {
     required this.id,
     required this.deviceId,
     this.preferredMode,
-    this.consentResearch = false,
     this.createdAt,
     this.updatedAt,
   });
@@ -13,7 +12,6 @@ class User {
       id: json['id'] as int,
       deviceId: json['device_id'] as String,
       preferredMode: json['preferred_mode'] as String?,
-      consentResearch: json['consent_research'] as bool? ?? false,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -26,7 +24,6 @@ class User {
   final int id;
   final String deviceId;
   final String? preferredMode;
-  final bool consentResearch;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 }
