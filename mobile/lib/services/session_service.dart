@@ -14,8 +14,8 @@ class SessionService {
     final body = await _client.postJson('/sessions', {
       if (userId != null) 'user_id': userId,
       if (routeId != null) 'route_id': routeId,
-      if (startedAt != null) 'started_at': startedAt.toIso8601String(),
-      if (endedAt != null) 'ended_at': endedAt.toIso8601String(),
+      if (startedAt != null) 'started_at': startedAt.toUtc().toIso8601String(),
+      if (endedAt != null) 'ended_at': endedAt.toUtc().toIso8601String(),
       if (mode != null) 'mode': mode,
     });
     return Session.fromJson(body['data'] as Map<String, dynamic>);
@@ -44,8 +44,8 @@ class SessionService {
     final body = await _client.patchJson('/sessions/$id', {
       if (userId != null) 'user_id': userId,
       if (routeId != null) 'route_id': routeId,
-      if (startedAt != null) 'started_at': startedAt.toIso8601String(),
-      if (endedAt != null) 'ended_at': endedAt.toIso8601String(),
+      if (startedAt != null) 'started_at': startedAt.toUtc().toIso8601String(),
+      if (endedAt != null) 'ended_at': endedAt.toUtc().toIso8601String(),
       if (mode != null) 'mode': mode,
     });
     return Session.fromJson(body['data'] as Map<String, dynamic>);

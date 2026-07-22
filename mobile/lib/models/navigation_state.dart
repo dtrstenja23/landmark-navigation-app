@@ -15,6 +15,8 @@ class NavigationState {
     this.isFetchingRoute = false,
     this.totalDistanceM,
     this.totalDurationS,
+    this.routeId,
+    this.userId,
   });
 
   final LatLng userLocation;
@@ -29,6 +31,8 @@ class NavigationState {
   final bool isFetchingRoute;
   final int? totalDistanceM;
   final int? totalDurationS;
+  final int? routeId;
+  final int? userId;
 
   NavigationState copyWith({
     LatLng? userLocation,
@@ -43,6 +47,8 @@ class NavigationState {
     bool? isFetchingRoute,
     int? totalDistanceM,
     int? totalDurationS,
+    int? routeId,
+    int? userId,
   }) {
     return NavigationState(
       userLocation: userLocation ?? this.userLocation,
@@ -57,6 +63,8 @@ class NavigationState {
       isFetchingRoute: isFetchingRoute ?? this.isFetchingRoute,
       totalDistanceM: totalDistanceM ?? this.totalDistanceM,
       totalDurationS: totalDurationS ?? this.totalDurationS,
+      routeId: routeId ?? this.routeId,
+      userId: userId ?? this.userId,
     );
   }
 }

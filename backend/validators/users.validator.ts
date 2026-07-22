@@ -21,5 +21,10 @@ export const idParamSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
+export const upsertUserSchema = z.object({
+  device_id: z.string().min(1).max(255),
+});
+
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+export type UpsertUserInput = z.infer<typeof upsertUserSchema>;

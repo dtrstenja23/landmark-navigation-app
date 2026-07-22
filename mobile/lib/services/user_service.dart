@@ -41,6 +41,13 @@ class UserService {
     return User.fromJson(body['data'] as Map<String, dynamic>);
   }
 
+  Future<User> upsertUser({required String deviceId}) async {
+    final body = await _client.postJson('/users/upsert', {
+      'device_id': deviceId,
+    });
+    return User.fromJson(body['data'] as Map<String, dynamic>);
+  }
+
   Future<void> deleteUser(int id) async {
     await _client.deleteJson('/users/$id');
   }

@@ -1,5 +1,5 @@
 import { prisma } from '../config/db.ts';
-import type { CreateUserInput, UpdateUserInput } from '../validators/users.validator.ts';
+import type { CreateUserInput, UpdateUserInput, UpsertUserInput } from '../validators/users.validator.ts';
 
 export const usersService = {
   getAll() {
@@ -20,6 +20,14 @@ export const usersService = {
 
   update(id: number, data: UpdateUserInput) {
     return prisma.users.update({ where: { id }, data });
+  },
+
+  upsertByDeviceId(data: UpsertUserInput) {
+    return prisma.users.upsert({
+      where: { device_id: data.device_id },
+      create: data,
+      update: {},
+    });
   },
 
   remove(id: number) {
