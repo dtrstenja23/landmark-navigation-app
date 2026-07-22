@@ -139,7 +139,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
               ? 'landmark_shown'
               : 'fallback_used',
           reactionTimeMs: shownAtStep != null
-              ? now.difference(shownAtStep).inMilliseconds
+              ? _positiveMillis(now.difference(shownAtStep))
               : null,
           metadata: {
             'completed': true,
@@ -202,3 +202,8 @@ final activeNavigationProvider =
     NotifierProvider<ActiveNavigationNotifier, ActiveNavigationState>(
       ActiveNavigationNotifier.new,
     );
+
+int _positiveMillis(Duration duration) {
+  final ms = duration.inMilliseconds;
+  return ms < 0 ? 0 : ms;
+}
