@@ -99,3 +99,18 @@ paths:
           description: Session deleted
         404:
           description: Session not found
+  /api/sessions/{id}/events:
+    get:
+      summary: List all events for a session
+      tags: [Sessions]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Events for the session, ordered by timestamp
+        404:
+          description: Session not found

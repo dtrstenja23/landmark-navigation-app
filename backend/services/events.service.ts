@@ -10,6 +10,13 @@ export const eventsService = {
     return prisma.events.findUnique({ where: { id } });
   },
 
+  getBySessionId(sessionId: number) {
+    return prisma.events.findMany({
+      where: { session_id: sessionId },
+      orderBy: { timestamp: 'asc' },
+    });
+  },
+
   create(data: CreateEventInput) {
     return prisma.events.create({ data });
   },
