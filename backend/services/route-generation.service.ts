@@ -138,6 +138,7 @@ export const routeGenerationService = {
                     polyline: route.polyline.encodedPolyline,
                     total_distance_m: route.distanceMeters,
                     total_duration_s: totalDurationS,
+                    travel_mode: params.travel_mode,
                 },
             });
 
