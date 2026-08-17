@@ -7,6 +7,7 @@ import 'package:landmark_navigation_app/providers/settings_provider.dart';
 import 'package:landmark_navigation_app/services/event_logger.dart';
 import 'package:landmark_navigation_app/services/location_service.dart';
 import 'package:landmark_navigation_app/services/session_service.dart';
+import 'package:landmark_navigation_app/services/tts_service.dart';
 import 'package:landmark_navigation_app/utils/navigation_utils.dart';
 
 class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
@@ -19,6 +20,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
   int _offRouteStreak = 0;
   bool _stopped = false;
   bool _sessionEnded = false;
+  final _ttsService = TtsService();
 
   @override
   ActiveNavigationState build() {
@@ -34,6 +36,12 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     _stopped = false;
     _sessionEnded = false;
     _startSession();
+
+    final steps = ref.read(navigationProvider).steps;
+    if (steps != null && steps.isNotEmpty) {
+      _ttsService.speak(steps[state.currentStepIndex].instructionText);
+    }
+
     _positionSubscription = _locationService.positionStream().listen(
       _onPosition,
       onError: (_) => stop(),
@@ -128,6 +136,8 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       newShownAt[stepIndex] = now;
       shownAt = newShownAt;
 
+      _ttsService.speak(steps[stepIndex].instructionText);
+
       for (var i = state.currentStepIndex; i < stepIndex; i++) {
         final completedStep = steps[i];
         if (completedStep.maneuver == 'DEPART') continue;
@@ -135,12 +145,14 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
         _eventLogger.log(
           sessionId: state.sessionId,
           stepId: completedStep.id,
-          eventType: completedStep.isLandmarkBased
-              ? 'landmark_shown'
-              : 'fallback_used',
-          reactionTimeMs: shownAtStep != null
-              ? _positiveMillis(now.difference(shownAtStep))
-              : null,
+          eventType:
+              completedStep.isLandmarkBased
+                  ? 'landmark_shown'
+                  : 'fallback_used',
+          reactionTimeMs:
+              shownAtStep != null
+                  ? _positiveMillis(now.difference(shownAtStep))
+                  : null,
           metadata: {
             'completed': true,
             'travel_mode': travelMode,
@@ -170,7 +182,10 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       stepShownAt: shownAt,
     );
 
-    if (arrived) _endSession();
+    if (arrived) {
+      _ttsService.speak('Stigli ste na odredište');
+      _endSession();
+    }
   }
 
   Future<void> _reroute(LatLng position) async {
