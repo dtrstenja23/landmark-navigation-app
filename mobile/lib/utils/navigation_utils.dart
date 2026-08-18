@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:landmark_navigation_app/models/navigation_step.dart';
+import 'package:landmark_navigation_app/utils/maneuver_utils.dart';
 
 class NavigationUtils {
   static const double _earthRadiusM = 6371000;
@@ -111,5 +112,41 @@ class NavigationUtils {
       drive: _offRouteThresholdDriveM,
     );
     return distanceToPolyline(position, polyline) > threshold;
+  }
+
+  static String? buildMilestonePrompt(
+    NavigationStep step,
+    int milestoneMeters,
+    String mode,
+  ) {
+    if (step.maneuver == 'DEPART') return null;
+
+    final distText =
+        milestoneMeters >= 1000 ? '1 kilometar' : '$milestoneMeters metara';
+
+    if (ManeuverUtils.isStraight(step.maneuver)) {
+      if (milestoneMeters < 500) return null;
+      return 'Nastavi ravno sljedećih $distText';
+    }
+
+    final base = ManeuverUtils.getText(step.maneuver);
+    final hasLandmark =
+        step.isLandmarkBased &&
+        step.landmarkName != null &&
+        step.landmarkName!.isNotEmpty;
+    final landmarkName = step.landmarkName ?? '';
+
+    if (milestoneMeters <= 50) {
+      if (hasLandmark) {
+        return 'Sad $base kod "$landmarkName"';
+      }
+      return 'Sad $base';
+    }
+
+    if (mode == 'classic' || !hasLandmark) {
+      return 'Za $distText $base';
+    } else {
+      return 'Za $distText $base kod "$landmarkName"';
+    }
   }
 }

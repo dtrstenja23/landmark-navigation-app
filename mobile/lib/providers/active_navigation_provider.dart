@@ -9,9 +9,12 @@ import 'package:landmark_navigation_app/services/location_service.dart';
 import 'package:landmark_navigation_app/services/session_service.dart';
 import 'package:landmark_navigation_app/services/tts_service.dart';
 import 'package:landmark_navigation_app/utils/navigation_utils.dart';
+import 'package:landmark_navigation_app/models/navigation_step.dart';
 
 class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
   static const _stepLookahead = 3;
+  static const _driveMilestones = [1000, 500, 200, 50];
+  static const _walkMilestones = [300, 100, 25];
 
   final _locationService = LocationService();
   final _sessionService = SessionService();
@@ -21,6 +24,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
   bool _stopped = false;
   bool _sessionEnded = false;
   final _ttsService = TtsService();
+  final Set<int> _triggeredMilestones = {};
 
   @override
   ActiveNavigationState build() {
@@ -37,8 +41,11 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     _sessionEnded = false;
     _startSession();
 
-    final steps = ref.read(navigationProvider).steps;
+    final navState = ref.read(navigationProvider);
+    final steps = navState.steps;
     if (steps != null && steps.isNotEmpty) {
+      final travelMode = navState.travelMode ?? 'WALK';
+      _resetMilestones(steps[state.currentStepIndex], travelMode);
       _ttsService.speak(steps[state.currentStepIndex].instructionText);
     }
 
@@ -46,6 +53,18 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       _onPosition,
       onError: (_) => stop(),
     );
+  }
+
+  void _resetMilestones(NavigationStep step, String travelMode) {
+    _triggeredMilestones.clear();
+    final milestones =
+        travelMode == 'DRIVE' ? _driveMilestones : _walkMilestones;
+    final initialDist = step.distanceM.toDouble();
+    for (final m in milestones) {
+      if (m >= initialDist - 50) {
+        _triggeredMilestones.add(m);
+      }
+    }
   }
 
   void stop() {
@@ -136,6 +155,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       newShownAt[stepIndex] = now;
       shownAt = newShownAt;
 
+      _resetMilestones(steps[stepIndex], travelMode);
       _ttsService.speak(steps[stepIndex].instructionText);
 
       for (var i = state.currentStepIndex; i < stepIndex; i++) {
@@ -185,6 +205,23 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     if (arrived) {
       _ttsService.speak('Stigli ste na odredište');
       _endSession();
+    } else {
+      final milestones =
+          travelMode == 'DRIVE' ? _driveMilestones : _walkMilestones;
+      for (final m in milestones) {
+        if (distanceToManeuver <= m && !_triggeredMilestones.contains(m)) {
+          _triggeredMilestones.add(m);
+          final prompt = NavigationUtils.buildMilestonePrompt(
+            newCurrentStep,
+            m,
+            ref.read(settingsProvider).mode,
+          );
+          if (prompt != null) {
+            _ttsService.speak(prompt);
+          }
+          break;
+        }
+      }
     }
   }
 
@@ -198,12 +235,18 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       final steps = newNavState.steps ?? [];
       final startIndex =
           steps.length > 1 && steps.first.maneuver == 'DEPART' ? 1 : 0;
+      final travelMode = newNavState.travelMode ?? 'WALK';
       _offRouteStreak = 0;
+      _triggeredMilestones.clear();
       state = state.copyWith(
         currentStepIndex: startIndex,
         stepShownAt: {},
         offRoute: false,
       );
+      if (steps.isNotEmpty) {
+        _resetMilestones(steps[startIndex], travelMode);
+        _ttsService.speak(steps[startIndex].instructionText);
+      }
       _eventLogger.log(
         sessionId: state.sessionId,
         eventType: 'reroute_triggered',

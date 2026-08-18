@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:landmark_navigation_app/providers/active_navigation_provider.dart';
 import 'package:landmark_navigation_app/providers/navigation_provider.dart';
+import 'package:landmark_navigation_app/utils/maneuver_utils.dart';
 
 class NextStep extends ConsumerWidget {
   const NextStep({super.key});
@@ -41,7 +42,7 @@ class NextStep extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.arrow_right_alt,
+                    ManeuverUtils.getIcon(nextStep.maneuver),
                     color: Colors.amber.shade800,
                     size: 22,
                   ),
