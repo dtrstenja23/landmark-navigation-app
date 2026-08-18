@@ -32,60 +32,53 @@ class InstructionBanner extends ConsumerWidget {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: SizedBox(
-          width: screenSize.width * 0.95,
-          height: screenSize.height * 0.1,
-          child: Card(
-            color: Colors.amber.shade800,
-            elevation: 6,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  isRerouting
-                      ? const SizedBox(
-                        width: 28,
-                        height: 28,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 3,
-                        ),
-                      )
-                      : Icon(
-                        ManeuverUtils.getIcon(currentStep.maneuver),
-                        color: Colors.white,
-                        size: 36,
-                      ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      displayText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
+    return SizedBox(
+      width: screenSize.width * 0.95,
+      child: Card(
+        color: Colors.amber.shade800,
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              isRerouting
+                  ? const SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 3,
                     ),
+                  )
+                  : Icon(
+                    ManeuverUtils.getIcon(currentStep.maneuver),
+                    color: Colors.white,
+                    size: 36,
                   ),
-                  IconButton(
-                    onPressed: () {
-                      ref.read(activeNavigationProvider.notifier).stop();
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.cancel, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  displayText,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
+              IconButton(
+                onPressed: () {
+                  ref.read(activeNavigationProvider.notifier).stop();
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.cancel, color: Colors.white),
+              ),
+            ],
           ),
         ),
       ),

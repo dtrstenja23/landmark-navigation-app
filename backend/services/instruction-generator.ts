@@ -74,12 +74,16 @@ export function generateInstruction(params:{
     landmark: {name: string} | null;
     mode: 'hybrid' | 'landmark' | 'classic';
     isArrival?: boolean;
+    isDepart?: boolean;
     start?: { lat: number; lng: number };
     end?: { lat: number; lng: number };
 }):Instruction{
-    const { maneuver, distanceMeters, landmark, mode, isArrival, start, end } = params;
+    const { maneuver, distanceMeters, landmark, mode, isArrival, isDepart, start, end } = params;
 
     if(isArrival){
+        if (distanceMeters > 0) {
+            return { text: `Za ${formatDistance(distanceMeters)} stižete na odredište`, isLandmarkBased: false };
+        }
         return { text: 'Stigli ste na odredište', isLandmarkBased: false };
     }
 
@@ -92,38 +96,51 @@ export function generateInstruction(params:{
     }
 
     const distanceFormatted = formatDistance(distanceMeters);
+    let instruction: Instruction;
 
     if (STRAIGHT_MANEUVERS.has(maneuver)) {
-        return { text: `Nastavi ravno sljedećih ${distanceFormatted}`, isLandmarkBased: false };
-    }
-
-    if (maneuver.startsWith('ROUNDABOUT')) {
+        instruction = { text: `Nastavi ravno sljedećih ${distanceFormatted}`, isLandmarkBased: false };
+    } else if (maneuver.startsWith('ROUNDABOUT')) {
         const exitDirection = maneuver === 'ROUNDABOUT_LEFT' ? 'izađi lijevo' : 'izađi desno';
         if (mode === 'classic' || landmark === null) {
-            return { text: `Za ${distanceFormatted} na kružnom toku ${exitDirection}`, isLandmarkBased: false };
-        }
-        const isRoundaboutLandmark = /rotor|kru[žz]ni/i.test(landmark.name);
-        if (isRoundaboutLandmark) {
-            if (mode === 'landmark') {
-                return { text: `Na rotoru "${landmark.name}" ${exitDirection}`, isLandmarkBased: true };
-            }
-            return { text: `Za ${distanceFormatted} na rotoru "${landmark.name}" ${exitDirection}`, isLandmarkBased: true };
+            instruction = { text: `Za ${distanceFormatted} na kružnom toku ${exitDirection}`, isLandmarkBased: false };
         } else {
-            if (mode === 'landmark') {
-                return { text: `Na kružnom toku ${exitDirection} kod "${landmark.name}"`, isLandmarkBased: true };
+            const isRoundaboutLandmark = /rotor|kru[žz]ni/i.test(landmark.name);
+            if (isRoundaboutLandmark) {
+                if (mode === 'landmark') {
+                    instruction = { text: `Na rotoru "${landmark.name}" ${exitDirection}`, isLandmarkBased: true };
+                } else {
+                    instruction = { text: `Za ${distanceFormatted} na rotoru "${landmark.name}" ${exitDirection}`, isLandmarkBased: true };
+                }
+            } else {
+                if (mode === 'landmark') {
+                    instruction = { text: `Na kružnom toku ${exitDirection} kod "${landmark.name}"`, isLandmarkBased: true };
+                } else {
+                    instruction = { text: `Za ${distanceFormatted} na kružnom toku ${exitDirection} kod "${landmark.name}"`, isLandmarkBased: true };
+                }
             }
-            return { text: `Za ${distanceFormatted} na kružnom toku ${exitDirection} kod "${landmark.name}"`, isLandmarkBased: true };
+        }
+    } else {
+        const base = MANEUVER[maneuver] ?? MANEUVER.MANEUVER_UNSPECIFIED;
+        if(mode === 'classic' || landmark === null){
+            instruction = { text: `Za ${distanceFormatted} ${base}`, isLandmarkBased: false };
+        }
+        else if(mode === 'landmark'){
+            instruction = { text: `${base.charAt(0).toUpperCase() + base.slice(1)} kod "${landmark.name}"`, isLandmarkBased: true };
+        }
+        else{
+            instruction = { text: `Za ${distanceFormatted} ${base} kod "${landmark.name}"`, isLandmarkBased: true };
         }
     }
 
-    const base = MANEUVER[maneuver] ?? MANEUVER.MANEUVER_UNSPECIFIED;
-    if(mode === 'classic' || landmark === null){
-        return { text: `Za ${distanceFormatted} ${base}`, isLandmarkBased: false };
+    if (isDepart && start && end) {
+        const direction = bearingToCompass(calculateBearing(start, end));
+        const lowerFirst = instruction.text.charAt(0).toLowerCase() + instruction.text.slice(1);
+        return {
+            text: `Kreni na ${direction}, ${lowerFirst}`,
+            isLandmarkBased: instruction.isLandmarkBased
+        };
     }
-    else if(mode === 'landmark'){
-        return { text: `${base.charAt(0).toUpperCase() + base.slice(1)} kod "${landmark.name}"`, isLandmarkBased: true };
-    }
-    else{
-        return { text: `Za ${distanceFormatted} ${base} kod "${landmark.name}"`, isLandmarkBased: true };
-    }
+
+    return instruction;
 }

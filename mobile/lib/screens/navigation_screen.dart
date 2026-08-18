@@ -65,10 +65,6 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Navigacija'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
       body: Stack(
         children: [
           GoogleMap(
@@ -83,8 +79,22 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
             polylines: navigationState.polylines,
             markers: navigationState.markers,
           ),
-          InstructionBanner(),
-          NextStep(),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    InstructionBanner(),
+                    SizedBox(height: 4),
+                    NextStep(),
+                  ],
+                ),
+              ),
+            ),
+          ),
           InfoBottomPanel(),
           Positioned(
             right: 16,

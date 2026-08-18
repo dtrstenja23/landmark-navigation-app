@@ -97,15 +97,41 @@ export const routeGenerationService = {
 
         const navigationSteps: NavigationStepInput[] = await Promise.all(
             steps.map(async (step, index) => {
-                const maneuver = step.navigationInstruction?.maneuver ?? 'MANEUVER_UNSPECIFIED';
-                const isArrival = index === steps.length - 1;
+                const isLast = index === steps.length - 1;
                 const point = {
                     lat: step.startLocation.latLng.latitude,
                     lng: step.startLocation.latLng.longitude
                 };
+                const endPoint = {
+                    lat: step.endLocation.latLng.latitude,
+                    lng: step.endLocation.latLng.longitude
+                };
 
-                const landmark = params.mode !== 'classic' && !isArrival && !SKIPPED_MANEUVERS.has(maneuver)
-                    ? await resolveLandmark(point)
+                if (isLast) {
+                    return {
+                        step_index: index,
+                        instruction_text: 'Stigli ste na odredište',
+                        distance_m: step.distanceMeters,
+                        maneuver: step.navigationInstruction?.maneuver ?? 'STRAIGHT',
+                        start_lat: point.lat,
+                        start_lng: point.lng,
+                        end_lat: endPoint.lat,
+                        end_lng: endPoint.lng,
+                        is_landmark_based: false,
+                        landmark_id: null,
+                    };
+                }
+
+                const nextStep = steps[index + 1];
+                const isNextArrival = (index + 1) === steps.length - 1;
+                const upcomingManeuver = nextStep.navigationInstruction?.maneuver ?? 'MANEUVER_UNSPECIFIED';
+                const nextManeuverPoint = {
+                    lat: nextStep.startLocation.latLng.latitude,
+                    lng: nextStep.startLocation.latLng.longitude
+                };
+
+                const landmark = params.mode !== 'classic' && !isNextArrival && !SKIPPED_MANEUVERS.has(upcomingManeuver)
+                    ? await resolveLandmark(nextManeuverPoint)
                     : null;
 
                 if (landmark) {
@@ -113,27 +139,25 @@ export const routeGenerationService = {
                 }
 
                 const instruction = generateInstruction({
-                    maneuver,
+                    maneuver: upcomingManeuver,
                     distanceMeters: step.distanceMeters,
                     landmark,
                     mode: params.mode,
-                    isArrival,
+                    isArrival: isNextArrival,
+                    isDepart: index === 0,
                     start: point,
-                    end: {
-                        lat: step.endLocation.latLng.latitude,
-                        lng: step.endLocation.latLng.longitude
-                    }
+                    end: nextManeuverPoint
                 });
 
                 const navigationStep: NavigationStepInput = {
                     step_index: index,
                     instruction_text: instruction.text,
                     distance_m: step.distanceMeters,
-                    maneuver,
+                    maneuver: upcomingManeuver,
                     start_lat: point.lat,
                     start_lng: point.lng,
-                    end_lat: step.endLocation.latLng.latitude,
-                    end_lng: step.endLocation.latLng.longitude,
+                    end_lat: endPoint.lat,
+                    end_lng: endPoint.lng,
                     is_landmark_based: instruction.isLandmarkBased,
                     landmark_id: landmark?.id ?? null,
                 };

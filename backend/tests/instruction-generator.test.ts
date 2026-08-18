@@ -39,16 +39,25 @@ test('hybrid mode keeps both the distance and the landmark', () => {
 });
 
 test('arrival step always wins, regardless of mode or landmark', () => {
-    const instruction = generateInstruction({
+    const instructionApproach = generateInstruction({
         maneuver: 'TURN_LEFT',
-        distanceMeters: 24,
+        distanceMeters: 74,
         landmark: { name: 'Restoran Barok' },
         mode: 'hybrid',
         isArrival: true
     });
+    assert.equal(instructionApproach.text, 'Za 70 m stižete na odredište');
+    assert.equal(instructionApproach.isLandmarkBased, false);
 
-    assert.equal(instruction.text, 'Stigli ste na odredište');
-    assert.equal(instruction.isLandmarkBased, false);
+    const instructionFinal = generateInstruction({
+        maneuver: 'STRAIGHT',
+        distanceMeters: 0,
+        landmark: null,
+        mode: 'hybrid',
+        isArrival: true
+    });
+    assert.equal(instructionFinal.text, 'Stigli ste na odredište');
+    assert.equal(instructionFinal.isLandmarkBased, false);
 });
 
 test('landmark mode without a found landmark falls back to classic text', () => {
@@ -158,6 +167,21 @@ test('roundabout with rotor landmark avoids redundant phrasing', () => {
         mode: 'landmark'
     });
     assert.equal(instruction2.text, 'Na kružnom toku izađi lijevo kod "Zrinski trg"');
+});
+
+test('isDepart prepends compass direction to the initial instruction', () => {
+    const instruction = generateInstruction({
+        maneuver: 'TURN_LEFT',
+        distanceMeters: 188,
+        landmark: { name: 'Kapelica' },
+        mode: 'hybrid',
+        isDepart: true,
+        start: { lat: 46.520345, lng: 16.398037 },
+        end: { lat: 46.519873, lng: 16.400035 }
+    });
+
+    assert.equal(instruction.text, 'Kreni na istok, za 200 m skreni lijevo kod "Kapelica"');
+    assert.equal(instruction.isLandmarkBased, true);
 });
 
 
