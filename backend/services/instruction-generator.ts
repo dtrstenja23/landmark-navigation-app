@@ -47,6 +47,27 @@ export type Instruction = {
     isLandmarkBased:boolean;
 };
 
+export function formatDistance(distanceMeters: number): string {
+    if (distanceMeters >= 1000) {
+        const km = (distanceMeters / 1000).toFixed(1);
+        const formattedKm = km.endsWith('.0') ? km.slice(0, -2) : km.replace('.', ',');
+        return `${formattedKm} km`;
+    }
+
+    if (distanceMeters >= 100) {
+        const rounded = Math.round(distanceMeters / 50) * 50;
+        if (rounded >= 1000) {
+            return '1 km';
+        }
+        return `${rounded} m`;
+    }
+
+    const rounded = Math.max(10, Math.round(distanceMeters / 10) * 10);
+    return `${rounded} m`;
+}
+
+const STRAIGHT_MANEUVERS = new Set(['NAME_CHANGE', 'STRAIGHT', 'MANEUVER_UNSPECIFIED']);
+
 export function generateInstruction(params:{
     maneuver: string;
     distanceMeters: number;
@@ -70,17 +91,39 @@ export function generateInstruction(params:{
         };
     }
 
-    const base = MANEUVER[maneuver] ?? MANEUVER.MANEUVER_UNSPECIFIED;
-    let instruction : Instruction;
-    if(mode === 'classic' || landmark === null){
-        instruction = {text:`Za ${distanceMeters} m ${base}`, isLandmarkBased: false};
-    }
-    else if(mode === 'landmark'){
-        instruction = {text:`${base.charAt(0).toUpperCase() + base.slice(1)} kod "${landmark.name}"`, isLandmarkBased: true};
-    }
-    else{
-        instruction = { text: `Za ${distanceMeters} m ${base} kod "${landmark.name}"`, isLandmarkBased: true};
+    const distanceFormatted = formatDistance(distanceMeters);
+
+    if (STRAIGHT_MANEUVERS.has(maneuver)) {
+        return { text: `Nastavi ravno sljedećih ${distanceFormatted}`, isLandmarkBased: false };
     }
 
-    return instruction;
+    if (maneuver.startsWith('ROUNDABOUT')) {
+        const exitDirection = maneuver === 'ROUNDABOUT_LEFT' ? 'izađi lijevo' : 'izađi desno';
+        if (mode === 'classic' || landmark === null) {
+            return { text: `Za ${distanceFormatted} na kružnom toku ${exitDirection}`, isLandmarkBased: false };
+        }
+        const isRoundaboutLandmark = /rotor|kru[žz]ni/i.test(landmark.name);
+        if (isRoundaboutLandmark) {
+            if (mode === 'landmark') {
+                return { text: `Na rotoru "${landmark.name}" ${exitDirection}`, isLandmarkBased: true };
+            }
+            return { text: `Za ${distanceFormatted} na rotoru "${landmark.name}" ${exitDirection}`, isLandmarkBased: true };
+        } else {
+            if (mode === 'landmark') {
+                return { text: `Na kružnom toku ${exitDirection} kod "${landmark.name}"`, isLandmarkBased: true };
+            }
+            return { text: `Za ${distanceFormatted} na kružnom toku ${exitDirection} kod "${landmark.name}"`, isLandmarkBased: true };
+        }
+    }
+
+    const base = MANEUVER[maneuver] ?? MANEUVER.MANEUVER_UNSPECIFIED;
+    if(mode === 'classic' || landmark === null){
+        return { text: `Za ${distanceFormatted} ${base}`, isLandmarkBased: false };
+    }
+    else if(mode === 'landmark'){
+        return { text: `${base.charAt(0).toUpperCase() + base.slice(1)} kod "${landmark.name}"`, isLandmarkBased: true };
+    }
+    else{
+        return { text: `Za ${distanceFormatted} ${base} kod "${landmark.name}"`, isLandmarkBased: true };
+    }
 }

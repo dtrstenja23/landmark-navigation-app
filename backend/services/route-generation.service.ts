@@ -20,7 +20,7 @@ type NavigationStepInput = {
     landmark_id: number | null;
 };
 
-const SKIPPED_MANEUVERS = new Set(['DEPART']);
+const SKIPPED_MANEUVERS = new Set(['DEPART', 'NAME_CHANGE', 'STRAIGHT', 'MANEUVER_UNSPECIFIED']);
 
 async function resolveLandmark(point: { lat: number; lng: number }) {
     const cached = await findCachedNear(point);
@@ -78,7 +78,22 @@ export const routeGenerationService = {
 
         const landmarksByStepIndex = new Map<number, landmarks>();
 
-        const steps = route.legs[0].steps;
+        const rawSteps = route.legs[0].steps;
+        const steps: typeof rawSteps = [];
+        for (let i = 0; i < rawSteps.length; i++) {
+            const step = rawSteps[i];
+            const isFirst = i === 0;
+            const isLast = i === rawSteps.length - 1;
+
+            if (!isFirst && !isLast && params.travel_mode === 'DRIVE' && step.distanceMeters < 15) {
+                if (steps.length > 0) {
+                    steps[steps.length - 1].distanceMeters += step.distanceMeters;
+                    steps[steps.length - 1].endLocation = step.endLocation;
+                }
+                continue;
+            }
+            steps.push(step);
+        }
 
         const navigationSteps: NavigationStepInput[] = await Promise.all(
             steps.map(async (step, index) => {
