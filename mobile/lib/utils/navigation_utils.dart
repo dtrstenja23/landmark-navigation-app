@@ -7,8 +7,8 @@ class NavigationUtils {
   static const double _earthRadiusM = 6371000;
   static const double _metersPerDegLat = _earthRadiusM * math.pi / 180;
 
-  static const double _advanceThresholdWalkM = 20;
-  static const double _advanceThresholdDriveM = 30;
+  static const double _advanceThresholdWalkM = 8;
+  static const double _advanceThresholdDriveM = 12;
   static const double _offRouteThresholdWalkM = 35;
   static const double _offRouteThresholdDriveM = 50;
 
@@ -59,6 +59,8 @@ class NavigationUtils {
   static double _distanceToPoint(LatLng point, LatLng target) =>
       _distanceToSegment(point, target, target);
 
+  static double distanceBetween(LatLng p1, LatLng p2) => _distanceToPoint(p1, p2);
+
   static double _threshold(
     String travelMode, {
     required double walk,
@@ -68,7 +70,7 @@ class NavigationUtils {
   }
 
   static double distanceToNextManeuver(LatLng position, NavigationStep step) {
-    return _distanceToPoint(position, LatLng(step.startLat, step.startLng));
+    return _distanceToPoint(position, LatLng(step.endLat, step.endLng));
   }
 
   static bool shouldAdvanceStep(

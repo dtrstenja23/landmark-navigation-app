@@ -12,7 +12,6 @@ import 'package:landmark_navigation_app/utils/navigation_utils.dart';
 import 'package:landmark_navigation_app/models/navigation_step.dart';
 
 class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
-  static const _stepLookahead = 3;
   static const _driveMilestones = [1000, 500, 200, 50];
   static const _walkMilestones = [300, 100, 25];
 
@@ -36,7 +35,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     return const ActiveNavigationState();
   }
 
-  void start() {
+  void start({bool simulate = false, double speedKmh = 50.0}) {
     _stopped = false;
     _sessionEnded = false;
     _startSession();
@@ -49,10 +48,19 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       _ttsService.speak(steps[state.currentStepIndex].instructionText);
     }
 
-    _positionSubscription = _locationService.positionStream().listen(
-      _onPosition,
-      onError: (_) => stop(),
-    );
+    final Stream<LatLng> stream;
+    if (simulate && navState.polylines.isNotEmpty) {
+      final points = navState.polylines.first.points;
+      final speed = navState.travelMode == 'DRIVE' ? speedKmh : 15.0;
+      stream = _locationService.simulatedPositionStream(
+        points,
+        speedKmh: speed,
+      );
+    } else {
+      stream = _locationService.positionStream();
+    }
+
+    _positionSubscription = stream.listen(_onPosition, onError: (_) => stop());
   }
 
   void _resetMilestones(NavigationStep step, String travelMode) {
@@ -137,17 +145,16 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     var stepIndex = state.currentStepIndex;
     var shownAt = state.stepShownAt;
 
-    final lookaheadEnd =
-        stepIndex + _stepLookahead < steps.length - 1
-            ? stepIndex + _stepLookahead
-            : steps.length - 1;
-    for (var i = stepIndex; i < lookaheadEnd; i++) {
-      final step = steps[i];
-      final reached =
-          step.maneuver == 'DEPART'
-              ? NavigationUtils.hasReachedStepEnd(position, step, travelMode)
-              : NavigationUtils.shouldAdvanceStep(position, step, travelMode);
-      if (reached) stepIndex = i + 1;
+    if (stepIndex < steps.length - 1) {
+      final currentStep = steps[stepIndex];
+      final reached = NavigationUtils.hasReachedStepEnd(
+        position,
+        currentStep,
+        travelMode,
+      );
+      if (reached) {
+        stepIndex++;
+      }
     }
     if (stepIndex != state.currentStepIndex) {
       final now = DateTime.now();
@@ -184,11 +191,10 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
 
     final isLastStep = stepIndex == steps.length - 1;
     final newCurrentStep = steps[stepIndex];
-    final newTargetsEnd = isLastStep || newCurrentStep.maneuver == 'DEPART';
-    final distanceToManeuver =
-        newTargetsEnd
-            ? NavigationUtils.distanceToStepEnd(position, newCurrentStep)
-            : NavigationUtils.distanceToNextManeuver(position, newCurrentStep);
+    final distanceToManeuver = NavigationUtils.distanceToStepEnd(
+      position,
+      newCurrentStep,
+    );
     final arrived =
         isLastStep &&
         NavigationUtils.hasReachedStepEnd(position, newCurrentStep, travelMode);

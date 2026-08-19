@@ -111,19 +111,39 @@ class DestinationBottomPanel extends ConsumerWidget {
                     label: const Text('Upute'),
                   ),
                 const SizedBox(width: 8),
-                if (navigationState.hasRoute)
+                if (navigationState.hasRoute) ...[
                   ElevatedButton.icon(
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => NavigationScreen(),
+                          builder: (context) => const NavigationScreen(),
                         ),
                       );
                     },
                     icon: const Icon(Icons.navigation),
                     label: const Text('Početak'),
                   ),
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) =>
+                                  const NavigationScreen(isSimulated: true),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.play_circle_outline, color: Colors.blue),
+                    label: const Text('Simuliraj'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue.shade800,
+                      side: BorderSide(color: Colors.blue.shade700, width: 1.5),
+                    ),
+                  ),
+                ],
               ],
             ),
           ],

@@ -8,7 +8,9 @@ import 'package:landmark_navigation_app/widgets/instruction_banner.dart';
 import 'package:landmark_navigation_app/widgets/next_step.dart';
 
 class NavigationScreen extends ConsumerStatefulWidget {
-  const NavigationScreen({super.key});
+  const NavigationScreen({super.key, this.isSimulated = false});
+
+  final bool isSimulated;
 
   @override
   ConsumerState<NavigationScreen> createState() => _NavigationScreenState();
@@ -33,7 +35,7 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
   void initState() {
     super.initState();
     _activeNavigationNotifier = ref.read(activeNavigationProvider.notifier);
-    _activeNavigationNotifier.start();
+    _activeNavigationNotifier.start(simulate: widget.isSimulated);
   }
 
   @override
@@ -64,6 +66,19 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
       }
     });
 
+    final activeState = ref.watch(activeNavigationProvider);
+    final markers = Set<Marker>.from(navigationState.markers);
+    if (widget.isSimulated && activeState.currentPosition != null) {
+      markers.add(
+        Marker(
+          markerId: const MarkerId('simulated_vehicle'),
+          position: activeState.currentPosition!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          anchor: const Offset(0.5, 0.5),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -73,11 +88,11 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
               target: navigationState.userLocation,
               zoom: 20.0,
             ),
-            myLocationEnabled: true,
+            myLocationEnabled: !widget.isSimulated,
             myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
             polylines: navigationState.polylines,
-            markers: navigationState.markers,
+            markers: markers,
           ),
           SafeArea(
             child: Padding(

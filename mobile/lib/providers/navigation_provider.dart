@@ -38,7 +38,11 @@ class NavigationNotifier extends Notifier<NavigationState> {
   }
 
   void setTravelMode(String travelMode) {
-    state = state.copyWith(travelMode: travelMode);
+    state = state.copyWith(
+      travelMode: travelMode,
+      hasRoute: false,
+      polylines: {},
+    );
   }
 
   void selectDestination(LatLng latLng, String name) {
