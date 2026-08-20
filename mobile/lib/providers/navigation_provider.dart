@@ -34,7 +34,9 @@ class NavigationNotifier extends Notifier<NavigationState> {
   }
 
   void setUserLocation(LatLng location) {
-    state = state.copyWith(userLocation: location);
+    if (!state.isCustomOrigin) {
+      state = state.copyWith(userLocation: location);
+    }
   }
 
   void setTravelMode(String travelMode) {
@@ -45,24 +47,72 @@ class NavigationNotifier extends Notifier<NavigationState> {
     );
   }
 
+  void selectCustomOrigin(LatLng latLng, String name) {
+    final markers = Set<Marker>.from(state.markers);
+    markers.removeWhere((m) => m.markerId.value == 'origin');
+    markers.add(
+      Marker(
+        markerId: const MarkerId('origin'),
+        position: latLng,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        infoWindow: InfoWindow(title: name),
+      ),
+    );
+
+    state = state.copyWith(
+      userLocation: latLng,
+      originName: name,
+      isCustomOrigin: true,
+      hasRoute: false,
+      polylines: {},
+      markers: markers,
+    );
+  }
+
+  void resetToGpsOrigin(LatLng gpsLocation) {
+    final markers = Set<Marker>.from(state.markers);
+    markers.removeWhere((m) => m.markerId.value == 'origin');
+
+    state = state.copyWith(
+      userLocation: gpsLocation,
+      clearOriginName: true,
+      isCustomOrigin: false,
+      hasRoute: false,
+      polylines: {},
+      markers: markers,
+    );
+  }
+
   void selectDestination(LatLng latLng, String name) {
+    final markers = Set<Marker>.from(state.markers);
+    markers.removeWhere((m) => m.markerId.value == 'destination');
+    markers.add(
+      Marker(
+        markerId: const MarkerId('destination'),
+        position: latLng,
+        infoWindow: InfoWindow(title: name),
+      ),
+    );
+
     state = state.copyWith(
       selectedDestination: latLng,
       destinationName: name,
       hasRoute: false,
       polylines: {},
-      markers: {
-        Marker(
-          markerId: const MarkerId('destination'),
-          position: latLng,
-          infoWindow: InfoWindow(title: name),
-        ),
-      },
+      markers: markers,
     );
   }
 
   void clearDestination() {
-    state = NavigationState(userLocation: state.userLocation);
+    final markers = Set<Marker>.from(state.markers);
+    markers.removeWhere((m) => m.markerId.value == 'destination');
+
+    state = NavigationState(
+      userLocation: state.userLocation,
+      originName: state.originName,
+      isCustomOrigin: state.isCustomOrigin,
+      markers: markers,
+    );
   }
 
   Future<bool> fetchRoute() async {

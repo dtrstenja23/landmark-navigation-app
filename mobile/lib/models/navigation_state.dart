@@ -4,6 +4,8 @@ import 'package:landmark_navigation_app/models/navigation_step.dart';
 class NavigationState {
   const NavigationState({
     this.userLocation = const LatLng(45.8150, 15.9819),
+    this.originName,
+    this.isCustomOrigin = false,
     this.selectedDestination,
     this.destinationName,
     this.hasRoute = false,
@@ -20,6 +22,8 @@ class NavigationState {
   });
 
   final LatLng userLocation;
+  final String? originName;
+  final bool isCustomOrigin;
   final LatLng? selectedDestination;
   final String? destinationName;
   final bool hasRoute;
@@ -36,8 +40,12 @@ class NavigationState {
 
   NavigationState copyWith({
     LatLng? userLocation,
+    String? originName,
+    bool clearOriginName = false,
+    bool? isCustomOrigin,
     LatLng? selectedDestination,
     String? destinationName,
+    bool clearDestination = false,
     bool? hasRoute,
     Set<Polyline>? polylines,
     Set<Marker>? markers,
@@ -52,8 +60,14 @@ class NavigationState {
   }) {
     return NavigationState(
       userLocation: userLocation ?? this.userLocation,
-      selectedDestination: selectedDestination ?? this.selectedDestination,
-      destinationName: destinationName ?? this.destinationName,
+      originName: clearOriginName ? null : (originName ?? this.originName),
+      isCustomOrigin: isCustomOrigin ?? this.isCustomOrigin,
+      selectedDestination:
+          clearDestination
+              ? null
+              : (selectedDestination ?? this.selectedDestination),
+      destinationName:
+          clearDestination ? null : (destinationName ?? this.destinationName),
       hasRoute: hasRoute ?? this.hasRoute,
       polylines: polylines ?? this.polylines,
       markers: markers ?? this.markers,

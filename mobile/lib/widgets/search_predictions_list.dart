@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:landmark_navigation_app/providers/navigation_provider.dart';
 
 class SearchPredictionsList extends ConsumerWidget {
   const SearchPredictionsList({
     super.key,
     required this.predictions,
+    required this.onPredictionTap,
   });
 
   final List<AutocompletePrediction> predictions;
+  final void Function(AutocompletePrediction prediction) onPredictionTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      constraints: const BoxConstraints(maxHeight: 300),
+      constraints: const BoxConstraints(maxHeight: 280),
       margin: const EdgeInsets.symmetric(horizontal: 12.0),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -25,6 +26,7 @@ class SearchPredictionsList extends ConsumerWidget {
       ),
       child: ListView.separated(
         shrinkWrap: true,
+        padding: EdgeInsets.zero,
         itemCount: predictions.length,
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
@@ -36,7 +38,7 @@ class SearchPredictionsList extends ConsumerWidget {
               prediction.secondaryText,
               style: const TextStyle(fontSize: 12),
             ),
-            onTap: () => ref.read(navigationProvider.notifier).selectPrediction(prediction),
+            onTap: () => onPredictionTap(prediction),
           );
         },
       ),
