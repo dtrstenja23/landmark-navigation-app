@@ -96,32 +96,36 @@ void main() {
   });
 
   group('distanceToNextManeuver', () {
-    test('measures distance to the start point of the step', () {
-      final step = _step(start: _north(origin, 40), end: _north(origin, 140));
+    test('measures distance to the end point of the step', () {
+      final step = _step(start: origin, end: _north(origin, 100));
+      final near = _north(origin, 60);
       expect(
-        NavigationUtils.distanceToNextManeuver(origin, step),
+        NavigationUtils.distanceToNextManeuver(near, step),
         closeTo(40, 0.5),
       );
     });
   });
 
   group('shouldAdvanceStep', () {
-    test('true when within WALK threshold (20 m)', () {
-      final step = _step(start: _north(origin, 15), end: _north(origin, 115));
-      expect(NavigationUtils.shouldAdvanceStep(origin, step, 'WALK'), isTrue);
+    test('true when within WALK threshold (8 m)', () {
+      final step = _step(start: origin, end: _north(origin, 100));
+      final near = _north(origin, 95);
+      expect(NavigationUtils.shouldAdvanceStep(near, step, 'WALK'), isTrue);
     });
 
-    test('false when beyond WALK threshold (20 m)', () {
-      final step = _step(start: _north(origin, 25), end: _north(origin, 125));
-      expect(NavigationUtils.shouldAdvanceStep(origin, step, 'WALK'), isFalse);
+    test('false when beyond WALK threshold (8 m)', () {
+      final step = _step(start: origin, end: _north(origin, 100));
+      final far = _north(origin, 90);
+      expect(NavigationUtils.shouldAdvanceStep(far, step, 'WALK'), isFalse);
     });
 
     test(
-      'true when within DRIVE threshold (30 m) but beyond WALK threshold',
+      'true when within DRIVE threshold (12 m) but beyond WALK threshold (8 m)',
       () {
-        final step = _step(start: _north(origin, 25), end: _north(origin, 125));
+        final step = _step(start: origin, end: _north(origin, 100));
+        final position = _north(origin, 90);
         expect(
-          NavigationUtils.shouldAdvanceStep(origin, step, 'DRIVE'),
+          NavigationUtils.shouldAdvanceStep(position, step, 'DRIVE'),
           isTrue,
         );
       },
@@ -152,6 +156,15 @@ void main() {
         );
       },
     );
+
+    test('true when beyond DRIVE threshold (50 m)', () {
+      final end = _north(origin, 100);
+      final far = _east(origin, 55);
+      expect(
+        NavigationUtils.isOffRoute(far, [origin, end], 'DRIVE'),
+        isTrue,
+      );
+    });
   });
 
   group('distanceToStepEnd', () {
@@ -166,16 +179,124 @@ void main() {
   });
 
   group('hasReachedStepEnd', () {
-    test('true when within WALK threshold (20 m) of the step end', () {
+    test('true when within WALK threshold (8 m) of the step end', () {
       final step = _step(start: origin, end: _north(origin, 100));
-      final near = _north(origin, 85);
+      final near = _north(origin, 95);
       expect(NavigationUtils.hasReachedStepEnd(near, step, 'WALK'), isTrue);
     });
 
-    test('false when beyond WALK threshold (20 m) of the step end', () {
+    test('false when beyond WALK threshold (8 m) of the step end', () {
       final step = _step(start: origin, end: _north(origin, 100));
-      final far = _north(origin, 70);
+      final far = _north(origin, 90);
       expect(NavigationUtils.hasReachedStepEnd(far, step, 'WALK'), isFalse);
+    });
+
+    test('true when within DRIVE threshold (12 m) of the step end', () {
+      final step = _step(start: origin, end: _north(origin, 100));
+      final near = _north(origin, 90);
+      expect(NavigationUtils.hasReachedStepEnd(near, step, 'DRIVE'), isTrue);
+    });
+  });
+
+  group('buildMilestonePrompt', () {
+    test('returns null for DEPART maneuver', () {
+      final step = NavigationStep(
+        id: 1,
+        stepIndex: 0,
+        instructionText: 'Kreni',
+        distanceM: 100,
+        maneuver: 'DEPART',
+        startLat: 0,
+        startLng: 0,
+        endLat: 0,
+        endLng: 0,
+        isLandmarkBased: false,
+      );
+      expect(NavigationUtils.buildMilestonePrompt(step, 50, 'classic'), isNull);
+    });
+
+    test('formats straight maneuver correctly', () {
+      final step = NavigationStep(
+        id: 1,
+        stepIndex: 0,
+        instructionText: 'Nastavi ravno',
+        distanceM: 1200,
+        maneuver: 'STRAIGHT',
+        startLat: 0,
+        startLng: 0,
+        endLat: 0,
+        endLng: 0,
+        isLandmarkBased: false,
+      );
+      expect(
+        NavigationUtils.buildMilestonePrompt(step, 1000, 'classic'),
+        'Nastavi ravno sljedećih 1 kilometar',
+      );
+      expect(
+        NavigationUtils.buildMilestonePrompt(step, 200, 'classic'),
+        isNull,
+      );
+    });
+
+    test('formats immediate maneuver prompt when within 50 m', () {
+      final stepWithLandmark = NavigationStep(
+        id: 1,
+        stepIndex: 0,
+        instructionText: 'Za 200 m skreni desno kod "Konzum"',
+        distanceM: 200,
+        maneuver: 'TURN_RIGHT',
+        startLat: 0,
+        startLng: 0,
+        endLat: 0,
+        endLng: 0,
+        isLandmarkBased: true,
+        landmarkName: 'Konzum',
+      );
+      expect(
+        NavigationUtils.buildMilestonePrompt(stepWithLandmark, 50, 'hybrid'),
+        'Sad skreni desno kod "Konzum"',
+      );
+
+      final stepClassic = NavigationStep(
+        id: 1,
+        stepIndex: 0,
+        instructionText: 'Za 200 m skreni desno',
+        distanceM: 200,
+        maneuver: 'TURN_RIGHT',
+        startLat: 0,
+        startLng: 0,
+        endLat: 0,
+        endLng: 0,
+        isLandmarkBased: false,
+      );
+      expect(
+        NavigationUtils.buildMilestonePrompt(stepClassic, 50, 'classic'),
+        'Sad skreni desno',
+      );
+    });
+
+    test('formats advance milestone with distance and landmark', () {
+      final step = NavigationStep(
+        id: 1,
+        stepIndex: 0,
+        instructionText: 'Za 200 m skreni desno kod "Konzum"',
+        distanceM: 200,
+        maneuver: 'TURN_RIGHT',
+        startLat: 0,
+        startLng: 0,
+        endLat: 0,
+        endLng: 0,
+        isLandmarkBased: true,
+        landmarkName: 'Konzum',
+      );
+      expect(
+        NavigationUtils.buildMilestonePrompt(step, 200, 'hybrid'),
+        'Za 200 metara skreni desno kod "Konzum"',
+      );
+      expect(
+        NavigationUtils.buildMilestonePrompt(step, 200, 'classic'),
+        'Za 200 metara skreni desno',
+      );
     });
   });
 }
