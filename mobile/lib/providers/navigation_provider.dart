@@ -55,6 +55,7 @@ class NavigationNotifier extends Notifier<NavigationState> {
         markerId: const MarkerId('origin'),
         position: latLng,
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        anchor: const Offset(0.5, 1.0),
         infoWindow: InfoWindow(title: name),
       ),
     );
@@ -90,6 +91,7 @@ class NavigationNotifier extends Notifier<NavigationState> {
       Marker(
         markerId: const MarkerId('destination'),
         position: latLng,
+        anchor: const Offset(0.5, 1.0),
         infoWindow: InfoWindow(title: name),
       ),
     );

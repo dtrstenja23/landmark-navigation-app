@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Landmark-Based Navigation App',
       theme: ThemeData().copyWith(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),

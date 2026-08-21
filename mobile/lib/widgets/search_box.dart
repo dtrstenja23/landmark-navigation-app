@@ -154,6 +154,14 @@ class _SearchBoxState extends ConsumerState<SearchBox> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(navigationProvider.select((s) => s.selectedDestination), (previous, next) {
+      if (next == null) {
+        _destinationController.clear();
+        _originController.clear();
+        setState(() => _predictions = []);
+      }
+    });
+
     final navState = ref.watch(navigationProvider);
     final isRouteActive = navState.selectedDestination != null;
 

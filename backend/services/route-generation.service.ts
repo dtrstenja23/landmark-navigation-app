@@ -21,6 +21,56 @@ type NavigationStepInput = {
 };
 
 const SKIPPED_MANEUVERS = new Set(['DEPART', 'NAME_CHANGE', 'STRAIGHT', 'MANEUVER_UNSPECIFIED']);
+const STRAIGHT_MANEUVERS = new Set(['NAME_CHANGE', 'STRAIGHT', 'MANEUVER_UNSPECIFIED']);
+
+type RawStep = {
+    distanceMeters: number;
+    startLocation: { latLng: { latitude: number; longitude: number } };
+    endLocation: { latLng: { latitude: number; longitude: number } };
+    navigationInstruction?: { maneuver?: string; instructions?: string };
+    polyline?: { encodedPolyline: string };
+};
+
+export function consolidateRawSteps(rawSteps: RawStep[]): RawStep[] {
+    if (rawSteps.length <= 1) return rawSteps;
+
+    const consolidated: RawStep[] = [];
+    let current: RawStep = {
+        ...rawSteps[0],
+        distanceMeters: rawSteps[0].distanceMeters,
+        startLocation: rawSteps[0].startLocation,
+        endLocation: rawSteps[0].endLocation,
+        navigationInstruction: rawSteps[0].navigationInstruction ? { ...rawSteps[0].navigationInstruction } : undefined,
+    };
+
+    for (let i = 1; i < rawSteps.length; i++) {
+        const next = rawSteps[i];
+        const isLast = i === rawSteps.length - 1;
+
+        const connectingManeuver = next.navigationInstruction?.maneuver ?? 'MANEUVER_UNSPECIFIED';
+        const isConnectingStraight = STRAIGHT_MANEUVERS.has(connectingManeuver);
+        const isNextMicro = !isLast && next.distanceMeters < 10;
+
+        if (isConnectingStraight || isNextMicro) {
+            current.distanceMeters += next.distanceMeters;
+            current.endLocation = next.endLocation;
+            if (next.navigationInstruction?.maneuver && !STRAIGHT_MANEUVERS.has(next.navigationInstruction.maneuver)) {
+                current.navigationInstruction = { ...next.navigationInstruction };
+            }
+        } else {
+            consolidated.push(current);
+            current = {
+                ...next,
+                distanceMeters: next.distanceMeters,
+                startLocation: next.startLocation,
+                endLocation: next.endLocation,
+                navigationInstruction: next.navigationInstruction ? { ...next.navigationInstruction } : undefined,
+            };
+        }
+    }
+    consolidated.push(current);
+    return consolidated;
+}
 
 async function resolveLandmark(point: { lat: number; lng: number }) {
     const cached = await findCachedNear(point);
@@ -79,21 +129,7 @@ export const routeGenerationService = {
         const landmarksByStepIndex = new Map<number, landmarks>();
 
         const rawSteps = route.legs[0].steps;
-        const steps: typeof rawSteps = [];
-        for (let i = 0; i < rawSteps.length; i++) {
-            const step = rawSteps[i];
-            const isFirst = i === 0;
-            const isLast = i === rawSteps.length - 1;
-
-            if (!isFirst && !isLast && params.travel_mode === 'DRIVE' && step.distanceMeters < 15) {
-                if (steps.length > 0) {
-                    steps[steps.length - 1].distanceMeters += step.distanceMeters;
-                    steps[steps.length - 1].endLocation = step.endLocation;
-                }
-                continue;
-            }
-            steps.push(step);
-        }
+        const steps = consolidateRawSteps(rawSteps);
 
         const navigationSteps: NavigationStepInput[] = await Promise.all(
             steps.map(async (step, index) => {

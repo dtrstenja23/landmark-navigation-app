@@ -74,7 +74,7 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
           markerId: const MarkerId('simulated_vehicle'),
           position: activeState.currentPosition!,
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-          anchor: const Offset(0.5, 0.5),
+          anchor: const Offset(0.5, 1.0),
         ),
       );
     }
