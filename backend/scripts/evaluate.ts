@@ -16,30 +16,30 @@ type BenchmarkRouteDef = {
 const TEST_ROUTES: BenchmarkRouteDef[] = [
     {
         id: 'R1',
-        name: 'Trg svetog Martina (Crkva) -> Terme Sveti Martin',
+        name: 'Župna crkva sv. Martina -> Terme Sveti Martin',
         type: 'Rural',
         travelMode: 'DRIVE',
-        origin: { lat: 46.531800, lng: 16.369400 },
-        destination: { lat: 46.505200, lng: 16.367800 },
-        description: 'Lokalna cesta kroz Brezovec s kapelicama i seoskim raskrižjima'
+        origin: { lat: 46.525500, lng: 16.368400 },
+        destination: { lat: 46.505500, lng: 16.367800 },
+        description: 'Lokalna cesta kroz Brezovec i Grkaveščak prema termalnom lječilištu'
     },
     {
         id: 'R2',
-        name: 'Trg svetog Martina (Crkva) -> Osnovna škola Sveti Martin',
+        name: 'Stadion NK Polet -> Trg svetog Martina (Crkva)',
         type: 'Rural',
         travelMode: 'WALK',
-        origin: { lat: 46.531800, lng: 16.369400 },
-        destination: { lat: 46.528500, lng: 16.371200 },
-        description: 'Pješačka seoska ruta uz crkvu sv. Martina i školu'
+        origin: { lat: 46.518500, lng: 16.368000 },
+        destination: { lat: 46.525500, lng: 16.368400 },
+        description: 'Pješačka seoska ruta od stadiona NK Polet (Dunajska ul.) do crkve u centru'
     },
     {
         id: 'R3',
         name: 'Čakovec Kolodvor -> Dvorac Zrinski (Stari grad)',
         type: 'Urban',
         travelMode: 'WALK',
-        origin: { lat: 46.388800, lng: 16.439500 },
-        destination: { lat: 46.388200, lng: 16.431200 },
-        description: 'Urbana pješačka ruta kroz gradsku jezgru i park'
+        origin: { lat: 46.385300, lng: 16.440400 },
+        destination: { lat: 46.388300, lng: 16.431500 },
+        description: 'Urbana pješačka ruta od željezničkog kolodvora kroz centar i Perivoj Zrinskih'
     },
     {
         id: 'R4',
@@ -61,30 +61,30 @@ const TEST_ROUTES: BenchmarkRouteDef[] = [
     },
     {
         id: 'R6',
-        name: 'Mursko Središće Centar -> Granični prijelaz',
+        name: 'Mursko Središće Centar (CZK Rudar) -> Granični prijelaz',
         type: 'Transit',
         travelMode: 'DRIVE',
         origin: { lat: 46.509800, lng: 16.441500 },
-        destination: { lat: 46.516200, lng: 16.438900 },
-        description: 'Tranzitna prometnica uz rijeku Muru'
+        destination: { lat: 46.516800, lng: 16.438000 },
+        description: 'Tranzitna prometnica D209 uz rijeku Muru prema graničnom prijelazu'
     },
     {
         id: 'R7',
-        name: 'Čakovec Jug -> Županijska bolnica Čakovec',
+        name: 'Čakovec Jug (Crkva sv. Antuna) -> Županijska bolnica Čakovec',
         type: 'Urban',
         travelMode: 'DRIVE',
-        origin: { lat: 46.375200, lng: 16.436000 },
-        destination: { lat: 46.392100, lng: 16.425100 },
-        description: 'Gradska transverzala kroz stambene i javne zone'
+        origin: { lat: 46.375500, lng: 16.436500 },
+        destination: { lat: 46.392500, lng: 16.425200 },
+        description: 'Gradska transverzala od juga grada kroz centar do bolnice'
     },
     {
         id: 'R8',
-        name: 'Trg svetog Martina (Crkva) -> Mlin na Muri (Žabnik)',
+        name: 'Župna crkva sv. Martina -> Mlin na Muri (Žabnik)',
         type: 'Rural',
         travelMode: 'DRIVE',
-        origin: { lat: 46.531800, lng: 16.369400 },
-        destination: { lat: 46.538500, lng: 16.381200 },
-        description: 'Turistička ruralna ruta prema rijeci Muri'
+        origin: { lat: 46.525500, lng: 16.368400 },
+        destination: { lat: 46.531300, lng: 16.379300 },
+        description: 'Turistička ruralna ruta prema plovećem mlinu i Eko muzeju u Žabniku'
     },
     {
         id: 'R9',
