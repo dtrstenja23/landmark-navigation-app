@@ -50,3 +50,5 @@ app.*.map.json
 .env
 /mobile/android/app/google-services.json
 /mobile/ios/Runner/GoogleService-Info.plist
+
+backend/evaluation_tables.md

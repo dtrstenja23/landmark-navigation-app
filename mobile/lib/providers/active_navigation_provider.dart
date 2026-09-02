@@ -9,6 +9,7 @@ import 'package:landmark_navigation_app/services/location_service.dart';
 import 'package:landmark_navigation_app/services/session_service.dart';
 import 'package:landmark_navigation_app/services/tts_service.dart';
 import 'package:landmark_navigation_app/utils/navigation_utils.dart';
+import 'package:landmark_navigation_app/utils/maneuver_utils.dart';
 import 'package:landmark_navigation_app/models/navigation_step.dart';
 
 class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
@@ -45,7 +46,14 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     if (steps != null && steps.isNotEmpty) {
       final travelMode = navState.travelMode ?? 'WALK';
       _resetMilestones(steps[state.currentStepIndex], travelMode);
-      _ttsService.speak(steps[state.currentStepIndex].instructionText);
+      final currentStep = steps[state.currentStepIndex];
+      final isLastStep = state.currentStepIndex == steps.length - 1;
+      if (isLastStep && currentStep.instructionText == 'Stigli ste na odredište' && currentStep.distanceM > 0) {
+        final dist = ManeuverUtils.formatDistance(currentStep.distanceM.toDouble());
+        _ttsService.speak('Za $dist stižete na odredište');
+      } else {
+        _ttsService.speak(currentStep.instructionText);
+      }
     }
 
     final Stream<LatLng> stream;
@@ -163,7 +171,14 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       shownAt = newShownAt;
 
       _resetMilestones(steps[stepIndex], travelMode);
-      _ttsService.speak(steps[stepIndex].instructionText);
+      final currentStep = steps[stepIndex];
+      final isLastStep = stepIndex == steps.length - 1;
+      if (isLastStep && currentStep.instructionText == 'Stigli ste na odredište' && currentStep.distanceM > 0) {
+        final dist = ManeuverUtils.formatDistance(currentStep.distanceM.toDouble());
+        _ttsService.speak('Za $dist stižete na odredište');
+      } else {
+        _ttsService.speak(currentStep.instructionText);
+      }
 
       for (var i = state.currentStepIndex; i < stepIndex; i++) {
         final completedStep = steps[i];
@@ -251,7 +266,14 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       );
       if (steps.isNotEmpty) {
         _resetMilestones(steps[startIndex], travelMode);
-        _ttsService.speak(steps[startIndex].instructionText);
+        final currentStep = steps[startIndex];
+        final isLastStep = startIndex == steps.length - 1;
+        if (isLastStep && currentStep.instructionText == 'Stigli ste na odredište' && currentStep.distanceM > 0) {
+          final dist = ManeuverUtils.formatDistance(currentStep.distanceM.toDouble());
+          _ttsService.speak('Za $dist stižete na odredište');
+        } else {
+          _ttsService.speak(currentStep.instructionText);
+        }
       }
       _eventLogger.log(
         sessionId: state.sessionId,

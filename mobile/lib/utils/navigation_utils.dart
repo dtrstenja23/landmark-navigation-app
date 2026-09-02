@@ -126,6 +126,10 @@ class NavigationUtils {
     final distText =
         milestoneMeters >= 1000 ? '1 kilometar' : '$milestoneMeters metara';
 
+    if (step.maneuver == 'ARRIVE') {
+      return 'Za $distText stižete na odredište';
+    }
+
     if (ManeuverUtils.isStraight(step.maneuver)) {
       if (milestoneMeters < 500) return null;
       return 'Nastavi ravno sljedećih $distText';

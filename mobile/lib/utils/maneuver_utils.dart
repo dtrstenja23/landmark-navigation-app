@@ -22,6 +22,7 @@ class ManeuverUtils {
     'ROUNDABOUT_RIGHT': 'na kružnom toku izađi desno',
     'NAME_CHANGE': 'nastavi ravno',
     'DEPART': 'kreni',
+    'ARRIVE': 'stižete na odredište',
   };
 
   static const Map<String, IconData> icons = {
@@ -45,6 +46,7 @@ class ManeuverUtils {
     'DEPART': Icons.navigation,
     'STRAIGHT': Icons.straight,
     'NAME_CHANGE': Icons.straight,
+    'ARRIVE': Icons.sports_score,
   };
 
   static String getText(String maneuver) => texts[maneuver] ?? 'nastavi ravno';
@@ -76,6 +78,12 @@ class ManeuverUtils {
 
     final dist = formatDistance(distanceMeters);
     final isNearZero = distanceMeters <= 5;
+
+    if (step.maneuver == 'ARRIVE') {
+      return isNearZero
+          ? 'Stigli ste na odredište'
+          : 'Za $dist stižete na odredište';
+    }
 
     if (isStraight(step.maneuver)) {
       return isNearZero ? 'Nastavi ravno' : 'Nastavi ravno sljedećih $dist';

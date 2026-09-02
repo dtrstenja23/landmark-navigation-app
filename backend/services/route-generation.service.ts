@@ -144,11 +144,22 @@ export const routeGenerationService = {
                 };
 
                 if (isLast) {
+                    const instruction = generateInstruction({
+                        maneuver: 'ARRIVE',
+                        distanceMeters: step.distanceMeters,
+                        landmark: null,
+                        mode: params.mode,
+                        isArrival: true,
+                        isDepart: index === 0,
+                        start: point,
+                        end: endPoint,
+                    });
+
                     return {
                         step_index: index,
-                        instruction_text: 'Stigli ste na odredište',
+                        instruction_text: instruction.text,
                         distance_m: step.distanceMeters,
-                        maneuver: step.navigationInstruction?.maneuver ?? 'STRAIGHT',
+                        maneuver: 'ARRIVE',
                         start_lat: point.lat,
                         start_lng: point.lng,
                         end_lat: endPoint.lat,
@@ -159,14 +170,13 @@ export const routeGenerationService = {
                 }
 
                 const nextStep = steps[index + 1];
-                const isNextArrival = (index + 1) === steps.length - 1;
                 const upcomingManeuver = nextStep.navigationInstruction?.maneuver ?? 'MANEUVER_UNSPECIFIED';
                 const nextManeuverPoint = {
                     lat: nextStep.startLocation.latLng.latitude,
                     lng: nextStep.startLocation.latLng.longitude
                 };
 
-                const landmark = params.mode !== 'classic' && !isNextArrival && !SKIPPED_MANEUVERS.has(upcomingManeuver)
+                const landmark = params.mode !== 'classic' && !SKIPPED_MANEUVERS.has(upcomingManeuver)
                     ? await resolveLandmark(nextManeuverPoint)
                     : null;
 
@@ -179,7 +189,7 @@ export const routeGenerationService = {
                     distanceMeters: step.distanceMeters,
                     landmark,
                     mode: params.mode,
-                    isArrival: isNextArrival,
+                    isArrival: false,
                     isDepart: index === 0,
                     start: point,
                     end: nextManeuverPoint

@@ -82,6 +82,10 @@ export function generateInstruction(params:{
 
     if(isArrival){
         if (distanceMeters > 0) {
+            if (isDepart && start && end) {
+                const direction = bearingToCompass(calculateBearing(start, end));
+                return { text: `Kreni na ${direction}, za ${formatDistance(distanceMeters)} stižete na odredište`, isLandmarkBased: false };
+            }
             return { text: `Za ${formatDistance(distanceMeters)} stižete na odredište`, isLandmarkBased: false };
         }
         return { text: 'Stigli ste na odredište', isLandmarkBased: false };
