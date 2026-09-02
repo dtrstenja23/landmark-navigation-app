@@ -37,11 +37,18 @@ class DualSearchCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.trip_origin,
-                      color: Colors.blue,
-                      size: 18,
+                    const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Center(
+                        child: Icon(
+                          Icons.trip_origin,
+                          color: Colors.blue,
+                          size: 18,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -49,6 +56,7 @@ class DualSearchCard extends StatelessWidget {
                         focusNode: originFocus,
                         controller: originController,
                         onTap: onTapOrigin,
+                        textAlignVertical: TextAlignVertical.center,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -62,11 +70,17 @@ class DualSearchCard extends StatelessWidget {
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(
-                            vertical: 6,
+                            vertical: 8,
+                          ),
+                          suffixIconConstraints: const BoxConstraints(
+                            minWidth: 28,
+                            minHeight: 28,
                           ),
                           suffixIcon:
                               isCustomOrigin
                                   ? IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
                                     icon: const Icon(
                                       Icons.my_location,
                                       size: 18,
@@ -84,11 +98,18 @@ class DualSearchCard extends StatelessWidget {
                 ),
                 const Divider(height: 12, thickness: 0.8),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 20,
+                    const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Center(
+                        child: Icon(
+                          Icons.location_on,
+                          color: Colors.red,
+                          size: 20,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -96,6 +117,7 @@ class DualSearchCard extends StatelessWidget {
                         focusNode: destinationFocus,
                         controller: destinationController,
                         onTap: onTapDestination,
+                        textAlignVertical: TextAlignVertical.center,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -104,7 +126,7 @@ class DualSearchCard extends StatelessWidget {
                           hintText: 'Unesi odredište...',
                           border: InputBorder.none,
                           isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 6),
+                          contentPadding: EdgeInsets.symmetric(vertical: 8),
                         ),
                         onChanged: onSearchChanged,
                       ),

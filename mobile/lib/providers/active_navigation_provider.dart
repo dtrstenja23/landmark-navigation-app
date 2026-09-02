@@ -36,9 +36,11 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     return const ActiveNavigationState();
   }
 
-  void start({bool simulate = false, double speedKmh = 50.0}) {
+  Future<void> start({bool simulate = false, double speedKmh = 50.0}) async {
     _stopped = false;
     _sessionEnded = false;
+    await Future.delayed(Duration.zero);
+    if (_stopped) return;
     _startSession();
 
     final navState = ref.read(navigationProvider);
@@ -48,13 +50,35 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       _resetMilestones(steps[state.currentStepIndex], travelMode);
       final currentStep = steps[state.currentStepIndex];
       final isLastStep = state.currentStepIndex == steps.length - 1;
-      if (isLastStep && currentStep.instructionText == 'Stigli ste na odredište' && currentStep.distanceM > 0) {
-        final dist = ManeuverUtils.formatDistance(currentStep.distanceM.toDouble());
-        _ttsService.speak('Za $dist stižete na odredište');
+      final text = (isLastStep && currentStep.instructionText == 'Stigli ste na odredište' && currentStep.distanceM > 0)
+          ? 'Za ${ManeuverUtils.formatDistance(currentStep.distanceM.toDouble())} stižete na odredište'
+          : currentStep.instructionText;
+
+      if (simulate) {
+        if (navState.polylines.isNotEmpty && navState.polylines.first.points.isNotEmpty) {
+          final startPos = navState.polylines.first.points.first;
+          state = state.copyWith(
+            currentPosition: startPos,
+            currentStepIndex: 0,
+            distanceToManeuver: NavigationUtils.distanceToStepEnd(startPos, currentStep),
+          );
+        }
+
+        try {
+          await _ttsService.speak(text).timeout(const Duration(seconds: 5));
+        } catch (_) {}
+
+        if (_stopped) return;
+
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        if (_stopped) return;
       } else {
-        _ttsService.speak(currentStep.instructionText);
+        _ttsService.speak(text);
       }
     }
+
+    if (_stopped) return;
 
     final Stream<LatLng> stream;
     if (simulate && navState.polylines.isNotEmpty) {
@@ -87,6 +111,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     _stopped = true;
     _positionSubscription?.cancel();
     _positionSubscription = null;
+    _ttsService.stop();
     _endSession();
     _eventLogger.dispose();
   }

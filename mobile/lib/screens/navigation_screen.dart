@@ -35,7 +35,11 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
   void initState() {
     super.initState();
     _activeNavigationNotifier = ref.read(activeNavigationProvider.notifier);
-    _activeNavigationNotifier.start(simulate: widget.isSimulated);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _activeNavigationNotifier.start(simulate: widget.isSimulated);
+      }
+    });
   }
 
   @override
