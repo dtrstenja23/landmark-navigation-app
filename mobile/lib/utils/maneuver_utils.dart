@@ -22,6 +22,7 @@ class ManeuverUtils {
     'ROUNDABOUT_RIGHT': 'na kružnom toku izađi desno',
     'NAME_CHANGE': 'nastavi ravno',
     'DEPART': 'kreni',
+    'ARRIVE': 'stižete na odredište',
   };
 
   static const Map<String, IconData> icons = {
@@ -45,6 +46,7 @@ class ManeuverUtils {
     'DEPART': Icons.navigation,
     'STRAIGHT': Icons.straight,
     'NAME_CHANGE': Icons.straight,
+    'ARRIVE': Icons.sports_score,
   };
 
   static String getText(String maneuver) => texts[maneuver] ?? 'nastavi ravno';
@@ -75,12 +77,20 @@ class ManeuverUtils {
     }
 
     final dist = formatDistance(distanceMeters);
+    final isNearZero = distanceMeters <= 5;
+
+    if (step.maneuver == 'ARRIVE') {
+      return isNearZero
+          ? 'Stigli ste na odredište'
+          : 'Za $dist stižete na odredište';
+    }
 
     if (isStraight(step.maneuver)) {
-      return 'Nastavi ravno sljedećih $dist';
+      return isNearZero ? 'Nastavi ravno' : 'Nastavi ravno sljedećih $dist';
     }
 
     final base = getText(step.maneuver);
+    final capitalizedBase = base.isEmpty ? '' : '${base[0].toUpperCase()}${base.substring(1)}';
     final hasLandmark =
         step.isLandmarkBased &&
         step.landmarkName != null &&
@@ -95,16 +105,24 @@ class ManeuverUtils {
           caseSensitive: false,
         ).hasMatch(step.landmarkName!);
         if (isRotor) {
-          return 'Za $dist na rotoru "${step.landmarkName}" $exitDirection';
+          return isNearZero
+              ? 'Na rotoru "${step.landmarkName}" $exitDirection'
+              : 'Za $dist na rotoru "${step.landmarkName}" $exitDirection';
         }
-        return 'Za $dist na kružnom toku $exitDirection kod "${step.landmarkName}"';
+        return isNearZero
+            ? 'Na kružnom toku $exitDirection kod "${step.landmarkName}"'
+            : 'Za $dist na kružnom toku $exitDirection kod "${step.landmarkName}"';
       }
-      return 'Za $dist na kružnom toku $exitDirection';
+      return isNearZero
+          ? 'Na kružnom toku $exitDirection'
+          : 'Za $dist na kružnom toku $exitDirection';
     }
 
     if (hasLandmark) {
-      return 'Za $dist $base kod "${step.landmarkName}"';
+      return isNearZero
+          ? '$capitalizedBase kod "${step.landmarkName}"'
+          : 'Za $dist $base kod "${step.landmarkName}"';
     }
-    return 'Za $dist $base';
+    return isNearZero ? capitalizedBase : 'Za $dist $base';
   }
 }

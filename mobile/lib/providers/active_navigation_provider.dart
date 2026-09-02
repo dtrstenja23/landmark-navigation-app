@@ -9,10 +9,10 @@ import 'package:landmark_navigation_app/services/location_service.dart';
 import 'package:landmark_navigation_app/services/session_service.dart';
 import 'package:landmark_navigation_app/services/tts_service.dart';
 import 'package:landmark_navigation_app/utils/navigation_utils.dart';
+import 'package:landmark_navigation_app/utils/maneuver_utils.dart';
 import 'package:landmark_navigation_app/models/navigation_step.dart';
 
 class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
-  static const _stepLookahead = 3;
   static const _driveMilestones = [1000, 500, 200, 50];
   static const _walkMilestones = [300, 100, 25];
 
@@ -36,9 +36,11 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     return const ActiveNavigationState();
   }
 
-  void start() {
+  Future<void> start({bool simulate = false, double speedKmh = 50.0}) async {
     _stopped = false;
     _sessionEnded = false;
+    await Future.delayed(Duration.zero);
+    if (_stopped) return;
     _startSession();
 
     final navState = ref.read(navigationProvider);
@@ -46,13 +48,51 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     if (steps != null && steps.isNotEmpty) {
       final travelMode = navState.travelMode ?? 'WALK';
       _resetMilestones(steps[state.currentStepIndex], travelMode);
-      _ttsService.speak(steps[state.currentStepIndex].instructionText);
+      final currentStep = steps[state.currentStepIndex];
+      final isLastStep = state.currentStepIndex == steps.length - 1;
+      final text = (isLastStep && currentStep.instructionText == 'Stigli ste na odredište' && currentStep.distanceM > 0)
+          ? 'Za ${ManeuverUtils.formatDistance(currentStep.distanceM.toDouble())} stižete na odredište'
+          : currentStep.instructionText;
+
+      if (simulate) {
+        if (navState.polylines.isNotEmpty && navState.polylines.first.points.isNotEmpty) {
+          final startPos = navState.polylines.first.points.first;
+          state = state.copyWith(
+            currentPosition: startPos,
+            currentStepIndex: 0,
+            distanceToManeuver: NavigationUtils.distanceToStepEnd(startPos, currentStep),
+          );
+        }
+
+        try {
+          await _ttsService.speak(text).timeout(const Duration(seconds: 5));
+        } catch (_) {}
+
+        if (_stopped) return;
+
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        if (_stopped) return;
+      } else {
+        _ttsService.speak(text);
+      }
     }
 
-    _positionSubscription = _locationService.positionStream().listen(
-      _onPosition,
-      onError: (_) => stop(),
-    );
+    if (_stopped) return;
+
+    final Stream<LatLng> stream;
+    if (simulate && navState.polylines.isNotEmpty) {
+      final points = navState.polylines.first.points;
+      final speed = navState.travelMode == 'DRIVE' ? speedKmh : 15.0;
+      stream = _locationService.simulatedPositionStream(
+        points,
+        speedKmh: speed,
+      );
+    } else {
+      stream = _locationService.positionStream();
+    }
+
+    _positionSubscription = stream.listen(_onPosition, onError: (_) => stop());
   }
 
   void _resetMilestones(NavigationStep step, String travelMode) {
@@ -71,6 +111,7 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     _stopped = true;
     _positionSubscription?.cancel();
     _positionSubscription = null;
+    _ttsService.stop();
     _endSession();
     _eventLogger.dispose();
   }
@@ -137,17 +178,16 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
     var stepIndex = state.currentStepIndex;
     var shownAt = state.stepShownAt;
 
-    final lookaheadEnd =
-        stepIndex + _stepLookahead < steps.length - 1
-            ? stepIndex + _stepLookahead
-            : steps.length - 1;
-    for (var i = stepIndex; i < lookaheadEnd; i++) {
-      final step = steps[i];
-      final reached =
-          step.maneuver == 'DEPART'
-              ? NavigationUtils.hasReachedStepEnd(position, step, travelMode)
-              : NavigationUtils.shouldAdvanceStep(position, step, travelMode);
-      if (reached) stepIndex = i + 1;
+    if (stepIndex < steps.length - 1) {
+      final currentStep = steps[stepIndex];
+      final reached = NavigationUtils.hasReachedStepEnd(
+        position,
+        currentStep,
+        travelMode,
+      );
+      if (reached) {
+        stepIndex++;
+      }
     }
     if (stepIndex != state.currentStepIndex) {
       final now = DateTime.now();
@@ -156,7 +196,14 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       shownAt = newShownAt;
 
       _resetMilestones(steps[stepIndex], travelMode);
-      _ttsService.speak(steps[stepIndex].instructionText);
+      final currentStep = steps[stepIndex];
+      final isLastStep = stepIndex == steps.length - 1;
+      if (isLastStep && currentStep.instructionText == 'Stigli ste na odredište' && currentStep.distanceM > 0) {
+        final dist = ManeuverUtils.formatDistance(currentStep.distanceM.toDouble());
+        _ttsService.speak('Za $dist stižete na odredište');
+      } else {
+        _ttsService.speak(currentStep.instructionText);
+      }
 
       for (var i = state.currentStepIndex; i < stepIndex; i++) {
         final completedStep = steps[i];
@@ -184,11 +231,10 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
 
     final isLastStep = stepIndex == steps.length - 1;
     final newCurrentStep = steps[stepIndex];
-    final newTargetsEnd = isLastStep || newCurrentStep.maneuver == 'DEPART';
-    final distanceToManeuver =
-        newTargetsEnd
-            ? NavigationUtils.distanceToStepEnd(position, newCurrentStep)
-            : NavigationUtils.distanceToNextManeuver(position, newCurrentStep);
+    final distanceToManeuver = NavigationUtils.distanceToStepEnd(
+      position,
+      newCurrentStep,
+    );
     final arrived =
         isLastStep &&
         NavigationUtils.hasReachedStepEnd(position, newCurrentStep, travelMode);
@@ -245,7 +291,14 @@ class ActiveNavigationNotifier extends Notifier<ActiveNavigationState> {
       );
       if (steps.isNotEmpty) {
         _resetMilestones(steps[startIndex], travelMode);
-        _ttsService.speak(steps[startIndex].instructionText);
+        final currentStep = steps[startIndex];
+        final isLastStep = startIndex == steps.length - 1;
+        if (isLastStep && currentStep.instructionText == 'Stigli ste na odredište' && currentStep.distanceM > 0) {
+          final dist = ManeuverUtils.formatDistance(currentStep.distanceM.toDouble());
+          _ttsService.speak('Za $dist stižete na odredište');
+        } else {
+          _ttsService.speak(currentStep.instructionText);
+        }
       }
       _eventLogger.log(
         sessionId: state.sessionId,

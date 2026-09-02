@@ -19,17 +19,30 @@ class InstructionBanner extends ConsumerWidget {
 
     final currentStep = steps[activeState.currentStepIndex];
     final isRerouting = navState.isFetchingRoute;
+    final isLastStep = activeState.currentStepIndex == steps.length - 1;
 
     String displayText;
     if (isRerouting) {
       displayText = 'Preusmjeravam...';
     } else if (activeState.arrived) {
       displayText = 'Stigli ste na odredište';
+    } else if (isLastStep && currentStep.maneuver != 'ARRIVE') {
+      final dist = ManeuverUtils.formatDistance(activeState.distanceToManeuver);
+      displayText = 'Za $dist stižete na odredište';
     } else {
       displayText = ManeuverUtils.formatLiveBanner(
         currentStep,
         activeState.distanceToManeuver,
       );
+    }
+
+    final IconData stepIcon;
+    if (activeState.arrived) {
+      stepIcon = Icons.check_circle;
+    } else if (currentStep.maneuver == 'ARRIVE' || isLastStep) {
+      stepIcon = Icons.sports_score;
+    } else {
+      stepIcon = ManeuverUtils.getIcon(currentStep.maneuver);
     }
 
     return SizedBox(
@@ -54,7 +67,7 @@ class InstructionBanner extends ConsumerWidget {
                     ),
                   )
                   : Icon(
-                    ManeuverUtils.getIcon(currentStep.maneuver),
+                    stepIcon,
                     color: Colors.white,
                     size: 36,
                   ),
