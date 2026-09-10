@@ -1,5 +1,5 @@
 import 'package:landmark_navigation_app/models/event.dart';
-import 'package:landmark_navigation_app/services/api_client.dart';
+import 'package:landmark_navigation_app/services/api/api_client.dart';
 
 class EventService {
   final ApiClient _client = ApiClient();

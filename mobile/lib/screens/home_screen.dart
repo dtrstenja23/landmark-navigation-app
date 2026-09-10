@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:landmark_navigation_app/providers/settings_provider.dart';
 import 'package:landmark_navigation_app/screens/settings_screen.dart';
-import 'package:landmark_navigation_app/services/location_service.dart';
+import 'package:landmark_navigation_app/services/device/location_service.dart';
 import 'package:landmark_navigation_app/widgets/destination_bottom_panel.dart';
 import 'package:landmark_navigation_app/widgets/search_box.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

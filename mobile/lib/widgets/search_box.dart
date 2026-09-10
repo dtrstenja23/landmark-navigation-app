@@ -5,7 +5,7 @@ import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart'
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:landmark_navigation_app/providers/navigation_provider.dart';
-import 'package:landmark_navigation_app/services/location_service.dart';
+import 'package:landmark_navigation_app/services/device/location_service.dart';
 import 'dual_search_card.dart';
 import 'search_predictions_list.dart';
 import 'single_search_field.dart';

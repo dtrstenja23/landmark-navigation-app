@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:landmark_navigation_app/models/navigation_state.dart';
 import 'package:landmark_navigation_app/providers/settings_provider.dart';
-import 'package:landmark_navigation_app/services/device_identity_service.dart';
-import 'package:landmark_navigation_app/services/route_generation_service.dart';
+import 'package:landmark_navigation_app/services/device/device_identity_service.dart';
+import 'package:landmark_navigation_app/services/api/route_generation_service.dart';
 import 'package:landmark_navigation_app/utils/polyline_utils.dart';
 
 class NavigationNotifier extends Notifier<NavigationState> {

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:landmark_navigation_app/models/pending_event.dart';
-import 'package:landmark_navigation_app/services/event_service.dart';
+import 'package:landmark_navigation_app/services/api/event_service.dart';
 
 class EventLogger {
   static const _flushInterval = Duration(seconds: 10);

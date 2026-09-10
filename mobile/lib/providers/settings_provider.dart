@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:landmark_navigation_app/models/settings_state.dart';
-import 'package:landmark_navigation_app/services/device_identity_service.dart';
-import 'package:landmark_navigation_app/services/user_service.dart';
+import 'package:landmark_navigation_app/services/device/device_identity_service.dart';
+import 'package:landmark_navigation_app/services/api/user_service.dart';
 
 class SettingsNotifier extends Notifier<SettingsState> {
   final _deviceIdentityService = DeviceIdentityService();

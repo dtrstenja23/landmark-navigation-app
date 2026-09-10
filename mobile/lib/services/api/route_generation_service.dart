@@ -1,6 +1,6 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:landmark_navigation_app/models/route.dart';
-import 'package:landmark_navigation_app/services/api_client.dart';
+import 'package:landmark_navigation_app/services/api/api_client.dart';
 
 class RouteGenerationService {
   final ApiClient _client = ApiClient();

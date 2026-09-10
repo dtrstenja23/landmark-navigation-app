@@ -1,5 +1,5 @@
 import 'package:landmark_navigation_app/models/landmark.dart';
-import 'package:landmark_navigation_app/services/api_client.dart';
+import 'package:landmark_navigation_app/services/api/api_client.dart';
 
 class LandmarkService {
   final ApiClient _client = ApiClient();
