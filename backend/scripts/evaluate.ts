@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { routeGenerationService } from '../services/route-generation.service.ts';
+import { routeGenerationService } from '../services/navigation/route-generation.service.ts';
 import { prisma } from '../config/db.ts';
 
 type BenchmarkRouteDef = {

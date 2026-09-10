@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../utils/AppError.ts';
 import { createSessionSchema, idParamSchema, updateSessionSchema } from '../validators/sessions.validator.ts';
-import { sessionsService } from '../services/sessions.service.ts';
-import { eventsService } from '../services/events.service.ts';
+import { sessionsService } from '../services/crud/sessions.service.ts';
+import { eventsService } from '../services/crud/events.service.ts';
 
 export async function getSessions(_req: Request, res: Response) {
   const sessions = await sessionsService.getAll();

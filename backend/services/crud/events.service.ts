@@ -1,5 +1,5 @@
-import { prisma } from '../config/db.ts';
-import type { CreateEventInput, UpdateEventInput } from '../validators/events.validator.ts';
+import { prisma } from '../../config/db.ts';
+import type { CreateEventInput, UpdateEventInput } from '../../validators/events.validator.ts';
 
 export const eventsService = {
   getAll() {

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { generateInstruction } from '../services/instruction-generator.ts';
+import { generateInstruction } from '../services/navigation/instruction-generator.ts';
 
 test('classic mode ignores landmark even when one is found', () => {
     const instruction = generateInstruction({

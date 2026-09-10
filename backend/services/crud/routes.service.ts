@@ -1,5 +1,5 @@
-import { prisma } from '../config/db.ts';
-import type { CreateRouteInput, UpdateRouteInput } from '../validators/routes.validator.ts';
+import { prisma } from '../../config/db.ts';
+import type { CreateRouteInput, UpdateRouteInput } from '../../validators/routes.validator.ts';
 
 export const routesService = {
   getAll() {

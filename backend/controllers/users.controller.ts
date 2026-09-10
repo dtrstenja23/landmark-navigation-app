@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { usersService } from '../services/users.service.ts';
+import { usersService } from '../services/crud/users.service.ts';
 import { AppError } from '../utils/AppError.ts';
 import {createUserSchema, idParamSchema, updateUserSchema, upsertUserSchema} from '../validators/users.validator.ts';
 

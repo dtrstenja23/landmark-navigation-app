@@ -1,11 +1,11 @@
-import { generateRoutes } from "../clients/googleRoutes.client.ts";
+import { generateRoutes } from "../../clients/googleRoutes.client.ts";
 import { generateInstruction } from "./instruction-generator.ts";
-import { usersService } from "./users.service.ts";
+import { usersService } from "../crud/users.service.ts";
 import { findCachedNear, scoreCandidates, upsertByPlaceId } from "./landmark-matcher.service.ts";
-import { searchNearbyPlaces, type GooglePlacesResponse } from "../clients/googlePlaces.client.ts";
-import type { landmarks } from "../generated/prisma/client.ts";
-import { prisma } from '../config/db.ts';
-import { AppError } from '../utils/AppError.ts';
+import { searchNearbyPlaces, type GooglePlacesResponse } from "../../clients/googlePlaces.client.ts";
+import type { landmarks } from "../../generated/prisma/client.ts";
+import { prisma } from '../../config/db.ts';
+import { AppError } from '../../utils/AppError.ts';
 
 type NavigationStepInput = {
     step_index: number;

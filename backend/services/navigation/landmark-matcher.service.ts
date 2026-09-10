@@ -1,6 +1,6 @@
-import type { GooglePlacesResponse } from '../clients/googlePlaces.client.ts';
-import type { landmarks } from '../generated/prisma/client.ts';
-import { prisma } from '../config/db.ts';
+import type { GooglePlacesResponse } from '../../clients/googlePlaces.client.ts';
+import type { landmarks } from '../../generated/prisma/client.ts';
+import { prisma } from '../../config/db.ts';
 
 type LandmarkCategory = 'monument' | 'transit_stop' | 'shop' | 'building';
 type PlaceCandidate = NonNullable<GooglePlacesResponse['places']>[number];

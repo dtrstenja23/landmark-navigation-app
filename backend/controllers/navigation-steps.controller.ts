@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { navigationStepsService } from '../services/navigation-steps.service.ts';
+import { navigationStepsService } from '../services/crud/navigation-steps.service.ts';
 import { AppError } from '../utils/AppError.ts';
 import { createNavigationStepSchema, idParamSchema, updateNavigationStepSchema } from '../validators/navigation-steps.validator.ts';
 

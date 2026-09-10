@@ -1,5 +1,5 @@
-import { prisma } from '../config/db.ts';
-import type { CreateLandmarkInput, UpdateLandmarkInput } from '../validators/landmarks.validator.ts';
+import { prisma } from '../../config/db.ts';
+import type { CreateLandmarkInput, UpdateLandmarkInput } from '../../validators/landmarks.validator.ts';
 
 export const landmarksService = {
     getAll(){

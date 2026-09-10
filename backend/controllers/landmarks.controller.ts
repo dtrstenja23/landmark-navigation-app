@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import {landmarksService} from '../services/landmarks.service.ts';
+import {landmarksService} from '../services/crud/landmarks.service.ts';
 import { AppError } from '../utils/AppError.ts';
 import {createLandmarkSchema, idParamSchema, updateLandmarkSchema} from '../validators/landmarks.validator.ts';
 

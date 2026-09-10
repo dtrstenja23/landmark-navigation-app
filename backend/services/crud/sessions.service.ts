@@ -1,5 +1,5 @@
-import { prisma } from '../config/db.ts';
-import type { CreateSessionInput, UpdateSessionInput } from '../validators/sessions.validator.ts';
+import { prisma } from '../../config/db.ts';
+import type { CreateSessionInput, UpdateSessionInput } from '../../validators/sessions.validator.ts';
 
 export const sessionsService = {
   getAll() {

@@ -1,5 +1,5 @@
-import { prisma } from '../config/db.ts';
-import type { CreateUserInput, UpdateUserInput, UpsertUserInput } from '../validators/users.validator.ts';
+import { prisma } from '../../config/db.ts';
+import type { CreateUserInput, UpdateUserInput, UpsertUserInput } from '../../validators/users.validator.ts';
 
 export const usersService = {
   getAll() {

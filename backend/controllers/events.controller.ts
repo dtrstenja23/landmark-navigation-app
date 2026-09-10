@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { eventsService } from '../services/events.service.ts';
+import { eventsService } from '../services/crud/events.service.ts';
 import { AppError } from '../utils/AppError.ts';
 import { createEventSchema, idParamSchema, updateEventSchema } from '../validators/events.validator.ts';
 

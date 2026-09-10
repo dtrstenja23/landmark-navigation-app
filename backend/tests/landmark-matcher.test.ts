@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { scoreCandidates } from '../services/landmark-matcher.service.ts';
+import { scoreCandidates } from '../services/navigation/landmark-matcher.service.ts';
 
 const ORIGIN = { lat: 45.0, lng: 16.0 };
 const METERS_PER_DEGREE_LAT = 111320;

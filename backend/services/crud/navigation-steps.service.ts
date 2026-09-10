@@ -1,5 +1,5 @@
-import { prisma } from '../config/db.ts';
-import type { CreateNavigationStepInput, UpdateNavigationStepInput } from '../validators/navigation-steps.validator.ts';
+import { prisma } from '../../config/db.ts';
+import type { CreateNavigationStepInput, UpdateNavigationStepInput } from '../../validators/navigation-steps.validator.ts';
 
 export const navigationStepsService = {
   getAll() {

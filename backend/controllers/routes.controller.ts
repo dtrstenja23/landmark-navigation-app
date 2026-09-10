@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import { routesService } from '../services/routes.service.ts';
+import { routesService } from '../services/crud/routes.service.ts';
 import { AppError } from '../utils/AppError.ts';
 import { createRouteSchema, generateRouteSchema, idParamSchema, updateRouteSchema } from '../validators/routes.validator.ts';
-import { routeGenerationService } from '../services/route-generation.service.ts';
+import { routeGenerationService } from '../services/navigation/route-generation.service.ts';
 export async function getRoutes(_req: Request, res: Response) {
   const routes = await routesService.getAll();
   res.json({ data: routes });
