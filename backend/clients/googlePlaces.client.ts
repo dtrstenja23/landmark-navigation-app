@@ -9,19 +9,48 @@ const FIELD_MASK = [
 ].join(',');
 
 const LANDMARK_TYPES = [
+    // Vjerski i kulturno-povijesni objekti
     'monument',
     'historical_landmark',
     'church',
+    'place_of_worship',
     'tourist_attraction',
+    'museum',
+    'cultural_center',
+    'city_hall',
+    'courthouse',
+    // Javni prijevoz i prometna infrastruktura
     'transit_station',
     'bus_stop',
+    'bus_station',
     'train_station',
     'subway_station',
-    'store',
-    'shopping_mall',
+    'ferry_terminal',
+    'gas_station',
+    // Sport i rekreacija
+    'stadium',
+    'sports_complex',
+    // Javne ustanove i servisi
+    'hospital',
+    'fire_station',
+    'post_office',
+    'library',
+    'university',
+    'school',
+    'cemetery',
+    // Smještaj
+    'hotel',
+    // Trgovine i ugostiteljstvo
     'supermarket',
+    'grocery_store',
+    'convenience_store',
+    'shopping_mall',
+    'department_store',
+    'store',
     'pharmacy',
     'bank',
+    'bakery',
+    'fast_food_restaurant',
     'cafe',
     'restaurant'
 ];

@@ -73,7 +73,7 @@ test('a candidate exactly at the score threshold is accepted', () => {
 
 test('an unmapped primaryType falls back to the building category', () => {
     const candidates = [
-        makeCandidate({ id: 'p1', name: 'Nepoznat tip', primaryType: 'convenience_store', distanceMeters: 10 })
+        makeCandidate({ id: 'p1', name: 'Nepoznat tip', primaryType: 'unmapped_custom_type', distanceMeters: 10 })
     ];
 
     const best = scoreCandidates(candidates, ORIGIN);

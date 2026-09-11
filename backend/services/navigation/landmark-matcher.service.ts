@@ -6,21 +6,51 @@ type LandmarkCategory = 'monument' | 'transit_stop' | 'shop' | 'building';
 type PlaceCandidate = NonNullable<GooglePlacesResponse['places']>[number];
 
 const CATEGORY_BY_TYPE: Record<string, LandmarkCategory> = {
+    // Spomenici, kulturni i vjerski objekti (Weight 3.0)
     monument: 'monument',
     historical_landmark: 'monument',
     tourist_attraction: 'monument',
     church: 'monument',
+    place_of_worship: 'monument',
+    museum: 'monument',
+    cultural_center: 'monument',
+    city_hall: 'monument',
+    courthouse: 'monument',
+
+    // Javni prijevoz i promet (Weight 2.5)
     transit_station: 'transit_stop',
     bus_stop: 'transit_stop',
+    bus_station: 'transit_stop',
     train_station: 'transit_stop',
     subway_station: 'transit_stop',
+    ferry_terminal: 'transit_stop',
+    gas_station: 'transit_stop',
+
+    // Trgovine i ugostiteljstvo (Weight 2.0)
     store: 'shop',
     shopping_mall: 'shop',
+    department_store: 'shop',
     supermarket: 'shop',
+    grocery_store: 'shop',
+    convenience_store: 'shop',
     pharmacy: 'shop',
     bank: 'shop',
     cafe: 'shop',
-    restaurant: 'shop'
+    restaurant: 'shop',
+    fast_food_restaurant: 'shop',
+    bakery: 'shop',
+    hotel: 'shop',
+
+    // Ustanove, sport i zgrade (Weight 1.5)
+    stadium: 'building',
+    sports_complex: 'building',
+    hospital: 'building',
+    fire_station: 'building',
+    post_office: 'building',
+    library: 'building',
+    university: 'building',
+    school: 'building',
+    cemetery: 'building'
 };
 
 const CATEGORY_WEIGHTS: Record<LandmarkCategory, number> = {
